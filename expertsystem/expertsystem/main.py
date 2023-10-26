@@ -6,6 +6,10 @@
 '''
 
 #этап 0: pandas для работы с csv
-import pandas as pd
+# import pandas as pd
 
 #этап 1: считывание csv, накидывание погрешности (15%)
+
+
+def main():
+    print('here')
