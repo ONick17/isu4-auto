@@ -49,7 +49,7 @@ class MyMainWindow(object):
         self.btn_select_config.setObjectName("btn_select_config")
 
         self.pyplot = MplCanvas(self, width=5, height=4, dpi=100)
-        self.pyplot.axes.plot([0,1,2,3,4], [10,1,20,3,40])
+        self.pyplot.axes.plot()
 
         self.toolbar = NavigationToolbar2QT(self.pyplot, parent=self.centralwidget)
 
