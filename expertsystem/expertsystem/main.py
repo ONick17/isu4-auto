@@ -5,18 +5,23 @@
 4. Игра => Предложение заготовленных скриптов, предложения по продаже энергии
 '''
 
-#этап 0: pandas для работы с csv, pyplot для отрисовки графиков, pyqt для интерфейса
-from PyQt5 import lol
-import st1_csv
+#этап 0
+#pandas для работы с csv
+#PyQt6  для интерфейса
+#sys для открытия проводника
+#qt_main - файл с интерфейсом главного окна
+import pandas as pd
+from PyQt6 import QtWidgets
+from qt_main import MyMainWindow
+import sys
 
 #этап 1: считывание csv, накидывание погрешности (15%)
-#st1_csv
 
-#этап 2: внесение данных о закупках в масивы, формирование графиков на всю игру с каждым новым внесением данных, создание рекоменаций(?)
-#st2_shop
-
-#этап 3: построение схемы для передачи энергии(?)
-#st3_build
-
-#этап 4: предложение готовых скриптов(?), прогон игры с учётом переданного скрипа, построение графика
-#st4_game
+#Код, запускающий интерфейс
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    main_window = MyMainWindow()
+    main_window.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
