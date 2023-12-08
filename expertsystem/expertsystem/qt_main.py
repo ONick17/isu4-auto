@@ -49,28 +49,28 @@ class MplCanvas(FigureCanvasQTAgg):
 class MyMainWindow(object):
     def __init__(self):
         self.data_to_show = []
+        self.qt_widget = None
 
 
     def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1200, 790)
-        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        self.qt_widget = MainWindow
+        self.qt_widget.setObjectName("MainWindow")
+        self.qt_widget.resize(1200, 790)
+        self.centralwidget = QtWidgets.QWidget(parent=self.qt_widget)
         self.centralwidget.setObjectName("centralwidget")
-        
 
         # ВЫБОР ФАЙЛА
+        font = QtGui.QFont()
+        font.setPointSize(12)
         # Кнопка выбора файла
         self.btn_select_file = QtWidgets.QPushButton(parent=self.centralwidget)
         self.btn_select_file.setGeometry(QtCore.QRect(20, 10, 150, 40))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.btn_select_file.setFont(font)
         self.btn_select_file.setObjectName("btn_select_file")
         # Подпись "Для начала работы выберите CSV-файл"
+        font.setPointSize(10)
         self.lbl_select_file = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_select_file.setGeometry(QtCore.QRect(180, 15, 320, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.lbl_select_file.setFont(font)
         self.lbl_select_file.setObjectName("lbl_select_file")
 
@@ -79,68 +79,101 @@ class MyMainWindow(object):
         # Подпись "График"
         self.lbl_plot_mode = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_plot_mode.setGeometry(QtCore.QRect(20, 60, 70, 20))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.lbl_plot_mode.setFont(font)
         self.lbl_plot_mode.setObjectName("lbl_plot_mode")
         # Выпадающий список для выбора графика
         self.lstbox_plot_mode = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_plot_mode.setGeometry(QtCore.QRect(90, 60, 200, 20))
+        self.lstbox_plot_mode.setGeometry(QtCore.QRect(100, 60, 200, 20))
         self.lstbox_plot_mode.setObjectName("lstbox_plot_mode")
+        self.lstbox_plot_mode.addItem("Оригинальный прогноз")
+        self.lstbox_plot_mode.addItem("Прогноз по вашим объектам")
+        self.lstbox_plot_mode.setCurrentIndex(0)
+
+        # Подпись "Показывать"
+        self.lbl_plot_show = QtWidgets.QLabel(parent=self.centralwidget)
+        self.lbl_plot_show.setGeometry(QtCore.QRect(20, 85, 70, 20))
+        self.lbl_plot_show.setFont(font)
+        self.lbl_plot_show.setObjectName("lbl_plot_show")
+        # Выпадающий список для выбора графика
+        self.lstbox_plot_show = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.lstbox_plot_show.setGeometry(QtCore.QRect(100, 85, 200, 20))
+        self.lstbox_plot_show.setObjectName("lstbox_plot_show")
+        self.lstbox_plot_show.addItem("Всё")
+        self.lstbox_plot_show.addItem("Производители")
+        self.lstbox_plot_show.addItem("Потребители")
+        self.lstbox_plot_show.setCurrentIndex(0)
 
         # Подпись "Отклонение данных"
         self.lbl_deviations = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviations.setGeometry(QtCore.QRect(20, 90, 160, 20))
-        font = QtGui.QFont()
-        font.setPointSize(10)
+        self.lbl_deviations.setGeometry(QtCore.QRect(20, 110, 160, 20))
         self.lbl_deviations.setFont(font)
         self.lbl_deviations.setObjectName("lbl_deviations")
         # Выбор погрешности для:
         # "СЭС"
         self.lbl_deviation_sun = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_sun.setGeometry(QtCore.QRect(20, 115, 30, 20))
+        self.lbl_deviation_sun.setGeometry(QtCore.QRect(20, 135, 30, 20))
         self.lbl_deviation_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_sun.setObjectName("lbl_deviation_sun")
         # СЭС
         self.lstbox_deviation_sun = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_sun.setGeometry(QtCore.QRect(50, 115, 50, 20))
+        self.lstbox_deviation_sun.setGeometry(QtCore.QRect(50, 135, 50, 20))
         self.lstbox_deviation_sun.setObjectName("lstbox_deviation_sun")
+        self.lstbox_deviation_sun.addItem("+25%")
+        self.lstbox_deviation_sun.addItem("0%")
+        self.lstbox_deviation_sun.addItem("-17%")
+        self.lstbox_deviation_sun.setCurrentIndex(1)
         # "ВЭС"
         self.lbl_deviation_wind = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_wind.setGeometry(QtCore.QRect(110, 115, 30, 20))
+        self.lbl_deviation_wind.setGeometry(QtCore.QRect(110, 135, 30, 20))
         self.lbl_deviation_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_wind.setObjectName("lbl_deviation_wind")
         # ВЭС
         self.lstbox_deviation_wind = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_wind.setGeometry(QtCore.QRect(140, 115, 50, 20))
+        self.lstbox_deviation_wind.setGeometry(QtCore.QRect(140, 135, 50, 20))
         self.lstbox_deviation_wind.setObjectName("lstbox_deviation_wind")
+        self.lstbox_deviation_wind.addItem("+25%")
+        self.lstbox_deviation_wind.addItem("0%")
+        self.lstbox_deviation_wind.addItem("-17%")
+        self.lstbox_deviation_wind.setCurrentIndex(1)
         # "Микрорайон"
         self.lbl_deviation_house = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_house.setGeometry(QtCore.QRect(200, 115, 80, 20))
+        self.lbl_deviation_house.setGeometry(QtCore.QRect(200, 135, 80, 20))
         self.lbl_deviation_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_house.setObjectName("lbl_deviation_house")
         # Микрорайон
         self.lstbox_deviation_house = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_house.setGeometry(QtCore.QRect(280, 115, 50, 20))
+        self.lstbox_deviation_house.setGeometry(QtCore.QRect(280, 135, 50, 20))
         self.lstbox_deviation_house.setObjectName("lstbox_deviation_house")
+        self.lstbox_deviation_house.addItem("+25%")
+        self.lstbox_deviation_house.addItem("0%")
+        self.lstbox_deviation_house.addItem("-17%")
+        self.lstbox_deviation_house.setCurrentIndex(1)
         # "Завод"
         self.lbl_deviation_factory = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_factory.setGeometry(QtCore.QRect(340, 115, 40, 20))
+        self.lbl_deviation_factory.setGeometry(QtCore.QRect(340, 135, 40, 20))
         self.lbl_deviation_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_factory.setObjectName("lbl_deviation_factory")
         # Завод
         self.lstbox_deviation_factory = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_factory.setGeometry(QtCore.QRect(380, 115, 50, 20))
+        self.lstbox_deviation_factory.setGeometry(QtCore.QRect(380, 135, 50, 20))
         self.lstbox_deviation_factory.setObjectName("lstbox_deviation_factory")
+        self.lstbox_deviation_factory.addItem("+25%")
+        self.lstbox_deviation_factory.addItem("0%")
+        self.lstbox_deviation_factory.addItem("-17%")
+        self.lstbox_deviation_factory.setCurrentIndex(1)
         # "Больница"
         self.lbl_deviation_hospital = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_hospital.setGeometry(QtCore.QRect(440, 115, 60, 20))
+        self.lbl_deviation_hospital.setGeometry(QtCore.QRect(440, 135, 60, 20))
         self.lbl_deviation_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_hospital.setObjectName("lbl_deviation_hospital")
         # Больница
         self.lstbox_deviation_hospital = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_hospital.setGeometry(QtCore.QRect(500, 115, 50, 20))
+        self.lstbox_deviation_hospital.setGeometry(QtCore.QRect(500, 135, 50, 20))
         self.lstbox_deviation_hospital.setObjectName("lstbox_deviation_hospital")
+        self.lstbox_deviation_hospital.addItem("+25%")
+        self.lstbox_deviation_hospital.addItem("0%")
+        self.lstbox_deviation_hospital.addItem("-17%")
+        self.lstbox_deviation_hospital.setCurrentIndex(1)
         
         # График
         self.pyplot_layout = QtWidgets.QVBoxLayout()
@@ -149,36 +182,29 @@ class MyMainWindow(object):
         self.pyplot_layout.addWidget(NavigationToolbar2QT(self.pyplot, parent=self.centralwidget))
         self.pyplot_widget = QtWidgets.QWidget(parent=self.centralwidget)
         self.pyplot_widget.setLayout(self.pyplot_layout)
-        self.pyplot_widget.setGeometry(QtCore.QRect(20, 140, 750, 550))
+        self.pyplot_widget.setGeometry(QtCore.QRect(20, 160, 750, 530))
         self.pyplot_widget.setObjectName("pyplot")
 
         # Подпись "Среднее накопление энергии"
+        font.setPointSize(12)
         self.lbl_mean_energy = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_mean_energy.setGeometry(QtCore.QRect(190, 700, 280, 20))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.lbl_mean_energy.setFont(font)
         self.lbl_mean_energy.setObjectName("lbl_mean_energy")
         # Среднее накопление энергии
         self.lbl_mean_energy2 = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_mean_energy2.setGeometry(QtCore.QRect(480, 700, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.lbl_mean_energy2.setFont(font)
         self.lbl_mean_energy2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_mean_energy2.setObjectName("lbl_mean_energy2")
         # Подпись "Ожидаемые потери энергии"
         self.lbl_mean_lost = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_mean_lost.setGeometry(QtCore.QRect(190, 730, 280, 20))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.lbl_mean_lost.setFont(font)
         self.lbl_mean_lost.setObjectName("lbl_mean_lost")
         # Ожидаемые потери энергии
         self.lbl_mean_lost2 = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_mean_lost2.setGeometry(QtCore.QRect(480, 730, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.lbl_mean_lost2.setFont(font)
         self.lbl_mean_lost2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_mean_lost2.setObjectName("lbl_mean_lost2")
@@ -188,202 +214,157 @@ class MyMainWindow(object):
         # Группа
         self.group_shop = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.group_shop.setGeometry(QtCore.QRect(780, 10, 410, 740))
-        font = QtGui.QFont()
-        font.setPointSize(12)
         self.group_shop.setFont(font)
         self.group_shop.setObjectName("group_shop")
 
         # Подпись "Число объектов в игре"
+        font.setPointSize(10)
         self.lbl_count_objects = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_objects.setGeometry(QtCore.QRect(10, 30, 200, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.lbl_count_objects.setFont(font)
         self.lbl_count_objects.setObjectName("lbl_count_objects")
         # Кнопка "Ввести новое"
         self.btn_count_objects = QtWidgets.QPushButton(parent=self.group_shop)
         self.btn_count_objects.setGeometry(QtCore.QRect(200, 30, 200, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.btn_count_objects.setFont(font)
         self.btn_count_objects.setObjectName("btn_count_objects")
 
         # Число объектов:
+        # font.setPointSize(8)
         # "СЭС"
         self.lbl_count_sun = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_sun.setGeometry(QtCore.QRect(10, 70, 40, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_sun.setFont(font)
         self.lbl_count_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_sun.setObjectName("lbl_count_sun")
         # СЭС
         self.lbl_count_sun2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_sun2.setGeometry(QtCore.QRect(50, 70, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_sun2.setFont(font)
         self.lbl_count_sun2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_sun2.setObjectName("lbl_count_sun2")
         # "ВЭС"
         self.lbl_count_wind = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_wind.setGeometry(QtCore.QRect(10, 100, 40, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_wind.setFont(font)
         self.lbl_count_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_wind.setObjectName("lbl_count_wind")
         # ВЭС
         self.lbl_count_wind2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_wind2.setGeometry(QtCore.QRect(50, 100, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_wind2.setFont(font)
         self.lbl_count_wind2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_wind2.setObjectName("lbl_count_wind2")
         # "МИКРОРАЙОН"
         self.lbl_count_house = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_house.setGeometry(QtCore.QRect(200, 70, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_house.setFont(font)
         self.lbl_count_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_house.setObjectName("lbl_count_house")
         # МИКРОРАЙОН
         self.lbl_count_house2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_house2.setGeometry(QtCore.QRect(280, 70, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_house2.setFont(font)
         self.lbl_count_house2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_house2.setObjectName("lbl_count_house2")
         # "ЗАВОД"
         self.lbl_count_factory = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_factory.setGeometry(QtCore.QRect(200, 100, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_factory.setFont(font)
         self.lbl_count_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_factory.setObjectName("lbl_count_factory")
         # ЗАВОД
         self.lbl_count_factory2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_factory2.setGeometry(QtCore.QRect(280, 100, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_factory2.setFont(font)
         self.lbl_count_factory2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_factory2.setObjectName("lbl_count_factory2")
         # "БОЛЬНИЦА"
         self.lbl_count_hospital = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_hospital.setGeometry(QtCore.QRect(200, 130, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_hospital.setFont(font)
         self.lbl_count_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_hospital.setObjectName("lbl_count_hospital")
         # БОЛЬНИЦА
         self.lbl_count_hospital2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_hospital2.setGeometry(QtCore.QRect(280, 130, 100, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_count_hospital2.setFont(font)
         self.lbl_count_hospital2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_hospital2.setObjectName("lbl_count_hospital2")
 
         # Подпись "Рекоммендованные цены"
+        font.setPointSize(10)
         self.lbl_best_prices = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_best_prices.setGeometry(QtCore.QRect(10, 160, 210, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.lbl_best_prices.setFont(font)
         self.lbl_best_prices.setObjectName("lbl_best_prices")
         # Рекоммендованные цены для:
+        # font.setPointSize(8)
         # "СЭС"
         self.lbl_price_sun = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_sun.setGeometry(QtCore.QRect(10, 200, 40, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_sun.setFont(font)
         self.lbl_price_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_sun.setObjectName("lbl_price_sun")
         # СЭС
         self.lbl_price_sun2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_sun2.setGeometry(QtCore.QRect(50, 200, 30, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_sun2.setFont(font)
         self.lbl_price_sun2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_sun2.setObjectName("lbl_price_sun2")
         # "ВЭС"
         self.lbl_price_wind = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_wind.setGeometry(QtCore.QRect(10, 230, 40, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_wind.setFont(font)
         self.lbl_price_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_wind.setObjectName("lbl_price_wind")
         # ВЭС
         self.lbl_price_wind2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_wind2.setGeometry(QtCore.QRect(50, 230, 30, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_wind2.setFont(font)
         self.lbl_price_wind2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_wind2.setObjectName("lbl_price_wind2")
         # "Микрорайон"
         self.lbl_price_house = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_house.setGeometry(QtCore.QRect(200, 200, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_house.setFont(font)
         self.lbl_price_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_house.setObjectName("lbl_price_house")
         # Микрорайон
         self.lbl_price_house2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_house2.setGeometry(QtCore.QRect(280, 200, 30, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_house2.setFont(font)
         self.lbl_price_house2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_house2.setObjectName("lbl_price_house2")
         # "Завод"
         self.lbl_price_factory = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_factory.setGeometry(QtCore.QRect(200, 230, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_factory.setFont(font)
         self.lbl_price_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_factory.setObjectName("lbl_price_factory")
         # Завод
         self.lbl_price_factory2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_factory2.setGeometry(QtCore.QRect(280, 230, 30, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_factory2.setFont(font)
         self.lbl_price_factory2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_factory2.setObjectName("lbl_price_factory2")
         # "Больница"
         self.lbl_price_hospital = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_hospital.setGeometry(QtCore.QRect(200, 260, 80, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_hospital.setFont(font)
         self.lbl_price_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_hospital.setObjectName("lbl_price_hospital")
         # Больница
         self.lbl_price_hospital2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_hospital2.setGeometry(QtCore.QRect(280, 260, 30, 20))
-        font = QtGui.QFont()
-        font.setPointSize(8)
         self.lbl_price_hospital2.setFont(font)
         self.lbl_price_hospital2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_hospital2.setObjectName("lbl_price_hospital2")
         
         # Подпись "Мои объекты"
+        font.setPointSize(10)
         self.lbl_my_objects = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_my_objects.setGeometry(QtCore.QRect(10, 290, 110, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.lbl_my_objects.setFont(font)
         self.lbl_my_objects.setObjectName("lbl_my_objects")
         # Пролистываемая область
@@ -404,26 +385,25 @@ class MyMainWindow(object):
         # Кнопка "Добавить мой объект"
         self.btn_add_my_object = QtWidgets.QPushButton(parent=self.group_shop)
         self.btn_add_my_object.setGeometry(QtCore.QRect(10, 660, 390, 30))
-        font = QtGui.QFont()
-        font.setPointSize(10)
         self.btn_add_my_object.setFont(font)
         self.btn_add_my_object.setObjectName("btn_add_my_object")
         # Кнопка "Добавить объект противника"
         self.btn_add_not_my_object = QtWidgets.QPushButton(parent=self.group_shop)
         self.btn_add_not_my_object.setGeometry(QtCore.QRect(10, 700, 390, 30))
-        font = QtGui.QFont()
-        font.btn_add_not_my_object(10)
-        self.btn_add_my_object.setFont(font)
+        self.btn_add_not_my_object.setFont(font)
         self.btn_add_not_my_object.setObjectName("btn_add_not_my_object")
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
+        self.add_functions()
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+    # Перевод текста
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "СтИЭС - Помощник"))
         self.lbl_plot_mode.setText(_translate("MainWindow", "График"))
+        self.lbl_plot_show.setText(_translate("MainWindow", "Показывать"))
         self.lbl_deviation_sun.setText(_translate("MainWindow", "СЭС"))
         self.btn_select_file.setText(_translate("MainWindow", "Выбрать файл"))
         self.lbl_deviations.setText(_translate("MainWindow", "Отклонение данных"))
@@ -449,7 +429,7 @@ class MyMainWindow(object):
         self.lbl_price_factory.setText(_translate("MainWindow", "Завод:"))
         self.lbl_price_hospital.setText(_translate("MainWindow", "Больница:"))
         self.lbl_price_sun.setText(_translate("MainWindow", "СЭС:"))
-        self.lbl_best_prices.setText(_translate("MainWindow", "Рекоммендованные цены:"))
+        self.lbl_best_prices.setText(_translate("MainWindow", "Рекомендованные цены:"))
         self.lbl_count_sun2.setText(_translate("MainWindow", "0 (осталось 0)"))
         self.lbl_count_wind2.setText(_translate("MainWindow", "0 (осталось 0)"))
         self.lbl_count_house2.setText(_translate("MainWindow", "0 (осталось 0)"))
@@ -468,9 +448,10 @@ class MyMainWindow(object):
     def add_functions(self):
         # Нажатие на кнопку "Выбрать файл" и выбор файла
         self.btn_select_file.clicked.connect(self.browse_files)
-        self.lbl_select_file.textChanged.connect(self.check_file)
         # Изменение графика
         self.lstbox_plot_mode.currentIndexChanged.connect(self.change_pyplot_data)
+        # Изменение выбора отображения
+        self.lstbox_plot_show.currentIndexChanged.connect(self.change_pyplot_data)
         # Изменение отклонений данных
         self.lstbox_deviation_sun.currentIndexChanged.connect(self.change_pyplot_data)
         self.lstbox_deviation_wind.currentIndexChanged.connect(self.change_pyplot_data)
@@ -483,10 +464,14 @@ class MyMainWindow(object):
         self.btn_add_my_object.clicked.connect(self.new_my_object)
         self.btn_add_not_my_object.clicked.connect(self.new_not_my_object)
 
+
     # Открытие проводника выбора файла
     def browse_files(self):
         fl = QtWidgets.QFileDialog.getOpenFileName(None, "Choose forecast", "", "(*.csv)")
-        self.lbl_select_file.setText(fl[0])
+        if fl:
+            self.lbl_select_file.setText(fl[0])
+            self.check_file()
+
 
     # Проверка выбранного файла на соответствие
     def check_file(self):
@@ -498,34 +483,44 @@ class MyMainWindow(object):
             #Чтение ожидаемого файла
             try:
                 self.data_to_show = parse(fl)
+                self.change_pyplot_data()
             except Exception:
                 self.lbl_select_file.setText("С файлом что-то не так!")
                 self.data_to_show = []
 
+
     # Изменение графика
     def change_pyplot_data(self):
-        pass
+        self.pyplot.axes.cla()
+        for building in list(self.data_to_show.keys()):
+            # plt.legend(list(data.keys()))
+            self.pyplot.axes.plot(self.data_to_show[building], label=building)
+            self.pyplot.axes.legend()
+            self.pyplot.draw()
+
 
     # Ввод объектов, учавствующих в игре
     def new_objects(self):
-        dialog_new_objects = QtWidgets.QDialog()
-        dialog_new_objects.ui = DialogNewObjects()
-        dialog_new_objects.ui.setupUi(dialog_new_objects)
-        if dialog_new_objects.exec_():
-            dialog_new_objects.return_
+        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+        dialog_new_objects = DialogNewObjects()
+        dialog_new_objects.setupUi(Dialog)
+        if Dialog.exec():
+            print(dialog_new_objects.return_)
+
 
     # Ввод объекта, купленного игроком
     def new_my_object(self):
-        dialog_add_object = QtWidgets.QDialog()
-        dialog_add_object.ui = DialogAddObject(True)
-        dialog_add_object.ui.setupUi(dialog_add_object)
-        if dialog_add_object.exec_():
-            dialog_add_object.return_
+        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+        dialog_add_object = DialogAddObject()
+        dialog_add_object.setupUi(Dialog)
+        if Dialog.exec():
+            print(dialog_add_object.return_)
+
 
     # Ввод объекта, купленного противником
     def new_not_my_object(self):
-        dialog_add_object = QtWidgets.QDialog()
-        dialog_add_object.ui = DialogAddObject(False)
-        dialog_add_object.ui.setupUi(dialog_add_object)
-        if dialog_add_object.exec_():
-            dialog_add_object.return_
+        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+        dialog_add_object = DialogAddObject()
+        dialog_add_object.setupUi(Dialog)
+        if Dialog.exec():
+            print(dialog_add_object.return_)
