@@ -10,9 +10,25 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
+import pandas as pd
+
 from qt_new_objects import DialogNewObjects
 from qt_add_object import DialogAddObject
 from myparser import parse
+
+
+
+ind_to_object = ["СЭС",
+                 "ВЭС",
+                 "Микрорайон",
+                 "Завод",
+                 "Больница"]
+
+object_to_ind = {"СЭС": 0,
+                 "ВЭС": 1,
+                 "Микрорайон": 2,
+                 "Завод": 3,
+                 "Больница": 4}
 
 
 
@@ -25,30 +41,15 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 
-# вспомогательный класс, позволяющий запускать функции при взаимодействии с выпадающим списком
-# class MyComboBox(QtWidgets.QComboBox):
-#     popupAboutToBeShown = QtCore.pyqtSignal()
-#     def showPopup(self):
-#         self.popupAboutToBeShown.emit()
-#         super(MyComboBox, self).showPopup()
-# создание выпадающего списка
-# self.lstbox_select_com1 = MyComboBox(self.centralwidget)
-# self.lstbox_select_com1.setGeometry(QtCore.QRect(190, 70, 250, 20))
-# self.lstbox_select_com1.setObjectName("lstbox_select_com1")
-# присоединение к списку функции
-# self.lstbox_select_com1.popupAboutToBeShown.connect(self.populateCombo1)
-# функция списка
-# def populateCombo1(self):
-#         self.lstbox_select_com1.clear()
-#         items = ["(пусто)"] + [str(x) for x in list_ports.comports()]
-#         self.lstbox_select_com1.addItems(items)
-
-
-
 #Класс с интерфейсом главного окна
 class MyMainWindow(object):
     def __init__(self):
-        self.data_to_show = []
+        self.data_forecast = None
+        self.objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
+        self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
+        self.my_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
+        self.my_objects = pd.DataFrame({"object": [], "price": []})
+        self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
         self.qt_widget = None
 
 
@@ -369,7 +370,7 @@ class MyMainWindow(object):
         self.lbl_my_objects.setObjectName("lbl_my_objects")
         # Пролистываемая область
         self.scroll_my_objects = QtWidgets.QScrollArea(parent=self.group_shop)
-        self.scroll_my_objects.setGeometry(QtCore.QRect(10, 320, 390, 331))
+        self.scroll_my_objects.setGeometry(QtCore.QRect(10, 320, 390, 291))
         self.scroll_my_objects.setWidgetResizable(True)
         self.scroll_my_objects.setObjectName("scroll_my_objects")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
@@ -377,21 +378,30 @@ class MyMainWindow(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         # Таблица с объектами
         self.table_my_objects = QtWidgets.QTableWidget(parent=self.scrollAreaWidgetContents)
-        self.table_my_objects.setGeometry(QtCore.QRect(0, 0, 390, 331))
+        self.table_my_objects.setGeometry(QtCore.QRect(0, 0, 390, 291))
         self.table_my_objects.setObjectName("table_my_objects")
-        self.table_my_objects.setColumnCount(0)
+        self.table_my_objects.setColumnCount(3)
+        self.table_my_objects.setHorizontalHeaderLabels(["Тип объекта", "Цена", "Удалить?"])  
+        self.table_my_objects.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        self.table_my_objects.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.table_my_objects.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
         self.table_my_objects.setRowCount(0)
         self.scroll_my_objects.setWidget(self.scrollAreaWidgetContents)
         # Кнопка "Добавить мой объект"
         self.btn_add_my_object = QtWidgets.QPushButton(parent=self.group_shop)
-        self.btn_add_my_object.setGeometry(QtCore.QRect(10, 660, 390, 30))
+        self.btn_add_my_object.setGeometry(QtCore.QRect(10, 620, 390, 30))
         self.btn_add_my_object.setFont(font)
         self.btn_add_my_object.setObjectName("btn_add_my_object")
         # Кнопка "Добавить объект противника"
         self.btn_add_not_my_object = QtWidgets.QPushButton(parent=self.group_shop)
-        self.btn_add_not_my_object.setGeometry(QtCore.QRect(10, 700, 390, 30))
+        self.btn_add_not_my_object.setGeometry(QtCore.QRect(10, 660, 390, 30))
         self.btn_add_not_my_object.setFont(font)
         self.btn_add_not_my_object.setObjectName("btn_add_not_my_object")
+        # Кнопка "Очистить объекты противника"
+        self.btn_clear_not_my_objects = QtWidgets.QPushButton(parent=self.group_shop)
+        self.btn_clear_not_my_objects.setGeometry(QtCore.QRect(10, 700, 390, 30))
+        self.btn_clear_not_my_objects.setFont(font)
+        self.btn_clear_not_my_objects.setObjectName("btn_clear_not_my_objects")
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
@@ -443,6 +453,7 @@ class MyMainWindow(object):
         self.lbl_my_objects.setText(_translate("MainWindow", "Мои объекты:"))
         self.btn_add_my_object.setText(_translate("MainWindow", "Добавить мой объект"))
         self.btn_add_not_my_object.setText(_translate("MainWindow", "Добавить объект противника"))
+        self.btn_clear_not_my_objects.setText(_translate("MainWindow", "Очистить объекты противника"))
 
     # Привязка функций к интерфейсу
     def add_functions(self):
@@ -461,8 +472,9 @@ class MyMainWindow(object):
         # Ввод числа объектов в игре
         self.btn_count_objects.clicked.connect(self.new_objects)
         # Ввод объектов игрока и противника
-        self.btn_add_my_object.clicked.connect(self.new_my_object)
-        self.btn_add_not_my_object.clicked.connect(self.new_not_my_object)
+        self.btn_add_my_object.clicked.connect(self.add_my_object)
+        self.btn_add_not_my_object.clicked.connect(self.add_not_my_object)
+        self.btn_clear_not_my_objects.clicked.connect(self.clear_not_my_objects)
 
 
     # Открытие проводника выбора файла
@@ -482,45 +494,242 @@ class MyMainWindow(object):
         else:
             #Чтение ожидаемого файла
             try:
-                self.data_to_show = parse(fl)
+                self.data_forecast = parse(fl)
                 self.change_pyplot_data()
+                self.update_mean_labels()
+                self.update_price_labels()
             except Exception:
                 self.lbl_select_file.setText("С файлом что-то не так!")
-                self.data_to_show = []
+                self.data_forecast = []
 
 
     # Изменение графика
     def change_pyplot_data(self):
-        self.pyplot.axes.cla()
-        for building in list(self.data_to_show.keys()):
-            # plt.legend(list(data.keys()))
-            self.pyplot.axes.plot(self.data_to_show[building], label=building)
-            self.pyplot.axes.legend()
-            self.pyplot.draw()
+        try:
+            # Очистка графика
+            self.pyplot.axes.cla()
+            if self.data_forecast:
+                # 0 - всё
+                # 1 - производители
+                # 2 - потребители
+                show = self.lstbox_plot_show.currentIndex()
+                if (show == 0):
+                    to_show = {"Солнце": [], "Ветер": [], "Микрорайон": [], "Завод": [], "Больница": []}
+                elif (show == 1):
+                    to_show = {"Солнце": [], "Ветер": []}
+                else:
+                    to_show = {"Микрорайон": [], "Завод": [], "Больница": []}
+                # 0 - +25
+                # 1 - 0
+                # 2 - -17
+                sun = self.lstbox_deviation_sun.currentIndex()
+                wind = self.lstbox_deviation_wind.currentIndex()
+                house = self.lstbox_deviation_house.currentIndex()
+                factory = self.lstbox_deviation_factory.currentIndex()
+                hospital = self.lstbox_deviation_hospital.currentIndex()
+
+                # Определение обращений к датафрейму по выбраным отклонениям данных
+                if (sun == 0):
+                    sun = "sun25"
+                elif (sun == 1):
+                    sun = "sun0"
+                else:
+                    sun = "sun17"
+                if (wind == 0):
+                    wind = "wind25"
+                elif (wind == 1):
+                    wind = "wind0"
+                else:
+                    wind = "wind17"
+                if (house == 0):
+                    house = "house25"
+                elif (house == 1):
+                    house = "house0"
+                else:
+                    house = "house17"
+                if (factory == 0):
+                    factory = "factory25"
+                elif (factory == 1):
+                    factory = "factory0"
+                else:
+                    factory = "factory17"
+                if (hospital == 0):
+                    hospital = "hospital25"
+                elif (hospital == 1):
+                    hospital = "hospital0"
+                else:
+                    hospital = "hospital17"
+                
+                # Множители для графика
+                # 0 - Оригинальный прогноз
+                # 1 - Прогноз по вашим объектам
+                mode = self.lstbox_plot_mode.currentIndex()
+                if (mode == 0):
+                    sun_count = 1
+                    wind_count = 1
+                    house_count = 1
+                    factory_count = 1
+                    hospital_count = 1
+                else:
+                    sun_count = self.objects_count["СЭС"]
+                    wind_count = self.objects_count["ВЭС"]
+                    house_count = self.objects_count["Микрорайон"]
+                    factory_count = self.objects_count["Завод"]
+                    hospital_count = self.objects_count["Больница"]
+                
+                # Сбор графика
+                for building in list(to_show.keys()):
+                    if building == "Солнце":
+                        self.pyplot.axes.plot(self.data_forecast.loc[:, sun]*sun_count, label="Солнце")
+                    elif building == "Ветер":
+                        self.pyplot.axes.plot(self.data_forecast.loc[:, wind]*wind_count, label="Ветер")
+                    elif building == "Микрорайон":
+                        self.pyplot.axes.plot(self.data_forecast.loc[:, house]*house_count, label="Микрорайон")
+                    elif building == "Завод":
+                        self.pyplot.axes.plot(self.data_forecast.loc[:, factory]*factory_count, label="Завод")
+                    elif building == "Больница":
+                        self.pyplot.axes.plot(self.data_forecast.loc[:, hospital]*hospital_count, label="Больница")
+                # plt.legend(list(data.keys()))
+                self.pyplot.axes.legend()
+                self.pyplot.draw()
+        except Exception as error:
+            print("функция change_pyplot_data")
+            print(error)
 
 
     # Ввод объектов, учавствующих в игре
     def new_objects(self):
-        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
-        dialog_new_objects = DialogNewObjects()
-        dialog_new_objects.setupUi(Dialog)
-        if Dialog.exec():
-            print(dialog_new_objects.return_)
+        try:
+            Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+            dialog_new_objects = DialogNewObjects()
+            dialog_new_objects.setupUi(Dialog)
+            if Dialog.exec():
+                # print(dialog_new_objects.return_)
+                new_data = dialog_new_objects.return_.copy()
+                self.objects_count["СЭС"] = new_data[0]
+                self.objects_count["ВЭС"] = new_data[1]
+                self.objects_count["Микрорайон"] = new_data[2]
+                self.objects_count["Завод"] = new_data[3]
+                self.objects_count["Больница"] = new_data[4]
+                self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
+                self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+                self.update_count_labels()
+                self.update_price_labels()
+        except Exception as error:
+            print("функция new_objects")
+            print(error)
 
 
     # Ввод объекта, купленного игроком
-    def new_my_object(self):
-        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
-        dialog_add_object = DialogAddObject()
-        dialog_add_object.setupUi(Dialog)
-        if Dialog.exec():
-            print(dialog_add_object.return_)
+    def add_my_object(self):
+        try:
+            Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+            dialog_add_object = DialogAddObject()
+            dialog_add_object.setupUi(Dialog)
+            if Dialog.exec():
+                new_data = dialog_add_object.return_.copy()
+                self.my_objects = pd.concat([self.my_objects, pd.DataFrame({'object': [new_data[0]], 'price': [new_data[1]]})], ignore_index=True)
+                rowPosition = self.table_my_objects.rowCount()
+                deleteButton = QtWidgets.QPushButton("Удалить")
+                deleteButton.clicked.connect(self.delete_clicked)
+                self.table_my_objects.insertRow(rowPosition)
+                self.table_my_objects.setItem(rowPosition, 0, QtWidgets.QTableWidgetItem(ind_to_object[new_data[0]]))
+                self.table_my_objects.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(str(new_data[1])))
+                self.table_my_objects.setCellWidget(rowPosition, 2, deleteButton)
+                self.my_objects_count[ind_to_object[new_data[0]]] += 1
+                self.update_count_labels()
+                self.update_mean_labels()
+                self.update_price_labels()
+        except Exception as error:
+            print("функция add_my_object")
+            print(error)
 
 
     # Ввод объекта, купленного противником
-    def new_not_my_object(self):
-        Dialog = QtWidgets.QDialog(parent=self.qt_widget)
-        dialog_add_object = DialogAddObject()
-        dialog_add_object.setupUi(Dialog)
-        if Dialog.exec():
-            print(dialog_add_object.return_)
+    def add_not_my_object(self):
+        try:
+            Dialog = QtWidgets.QDialog(parent=self.qt_widget)
+            dialog_add_object = DialogAddObject()
+            dialog_add_object.setupUi(Dialog)
+            if Dialog.exec():
+                new_data = dialog_add_object.return_.copy()
+                self.last_prices[ind_to_object[new_data[0]]] = new_data[1]
+                self.enemy_objects_count[ind_to_object[new_data[0]]] += 1
+                self.update_count_labels()
+                self.update_price_labels()
+        except Exception as error:
+            print("функция add_not_my_object")
+            print(error)
+
+
+    # Очистка списка объектов противника
+    def clear_not_my_objects(self):
+        self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
+        self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+        self.update_count_labels()
+        self.update_price_labels()
+
+
+    # Удаление объекта из таблицы
+    def delete_clicked(self):
+        try:
+            button = self.qt_widget.sender()
+            if button:
+                row = self.table_my_objects.indexAt(button.pos()).row()
+                object = self.table_my_objects.item(row, 0).text()
+                self.my_objects_count[object] -= 1
+                object = object_to_ind[object]
+                price = float(self.table_my_objects.item(row, 1).text())
+                indexToDrop = self.my_objects[(self.my_objects.object == object) & (self.my_objects.price == price)].index[0]
+                self.my_objects = self.my_objects.drop(indexToDrop)
+                self.table_my_objects.removeRow(row)
+                self.update_count_labels()
+                self.update_mean_labels()
+                self.update_price_labels()
+        except Exception as error:
+            print("функция delete_clicked")
+            print(error)
+
+
+    # Подсчёт количества объектов и вывод информации в лейблах
+    def update_count_labels(self):
+        try:
+            #"0 (осталось 0)"
+            counts = []
+            for object in list(self.objects_count.keys()):
+                counts.append(self.objects_count[object] - self.enemy_objects_count[object] - self.my_objects_count[object])
+            self.lbl_count_sun2.setText(str(self.objects_count["СЭС"]) + " (осталось " + str(counts[0]) + ")")
+            self.lbl_count_wind2.setText(str(self.objects_count["ВЭС"]) + " (осталось " + str(counts[1]) + ")")
+            self.lbl_count_house2.setText(str(self.objects_count["Микрорайон"]) + " (осталось " + str(counts[2]) + ")")
+            self.lbl_count_factory2.setText(str(self.objects_count["Завод"]) + " (осталось " + str(counts[3]) + ")")
+            self.lbl_count_hospital2.setText(str(self.objects_count["Больница"]) + " (осталось " + str(counts[4]) + ")")
+        except Exception as error:
+            print("функция update_count_labels")
+            print(error)
+
+
+    # TODO
+    # Подсчёт средних счётчиков и вывод информации в лейблах
+    def update_mean_labels(self):
+        try:
+            #"0МВт"
+            self.lbl_mean_energy2.setText(str() + "МВт")
+            self.lbl_mean_lost2.setText(str() + "МВт")
+            
+            # Максимальный уровень потерь в 20% достигается при суммарной мощности на ветке в 18 МВт независимо от того, генератор или потребитель находятся на этой ветке.
+            # Ожидаемые потери: 20%, если больше или равно 18МВт. ?%, если меньше 18МВт
+            # Предположение: (x/4)^2=процент потери, где x - текущая энергия
+            # Максимальное число веток: 5, если одна миниподстанция
+        except Exception as error:
+            print("функция update_mean_labels")
+            print(error)
+
+
+    # TODO
+    # Подсчёт рекомендуемых ценников
+    def update_price_labels(self):
+        self.lbl_price_sun2.setText(str())
+        self.lbl_price_wind2.setText(str())
+        self.lbl_price_house2.setText(str())
+        self.lbl_price_factory2.setText(str())
+        self.lbl_price_hospital2.setText(str())

@@ -92,5 +92,5 @@ class DialogAddObject(object):
 
     # Функция удачного завершения окна
     def accept_(self):
-        self.return_ = [self.cmbox_object.currentIndex(), self.spnbox_price.value()]
+        self.return_ = [int(self.cmbox_object.currentIndex()), float(self.spnbox_price.value())]
         self.dialog.accept()

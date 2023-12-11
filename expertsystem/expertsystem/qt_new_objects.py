@@ -131,5 +131,5 @@ class DialogNewObjects(object):
 
     # Функция удачного завершения окна
     def accept_(self):
-        self.return_ = [self.spinbox_sun.value(), self.spinbox_wind.value(), self.spinbox_house.value(), self.spinbox_factory.value(), self.spinbox_hospital.value()]
+        self.return_ = [int(self.spinbox_sun.value()), int(self.spinbox_wind.value()), int(self.spinbox_house.value()), int(self.spinbox_factory.value()), int(self.spinbox_hospital.value())]
         self.dialog.accept()
