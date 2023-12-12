@@ -99,7 +99,7 @@ def test_get_mod2():
     assert proc.bought_objects_count == 3
     assert proc.objects_count == 2
 
-
+# С остальными base_value алгоритм взаимодействия такой же
 def test_base_value_1():
     proc = DataProcessor()
     data = pd.DataFrame({

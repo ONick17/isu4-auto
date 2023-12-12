@@ -141,7 +141,7 @@ class DataProcessor():
             else:
                 self.bs3[k] = self.bs2[k] * (1 - mod3)
 
-        return pd.DataFrame([self.bs3.keys(), self.bs3.values()])
+        return pd.DataFrame.from_dict(self.bs3, 'columns')
 
     def get_base_value2(self):
         loss = 0
