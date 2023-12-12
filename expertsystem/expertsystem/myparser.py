@@ -96,33 +96,52 @@ class DataProcessor():
             map(lambda key: sum(data[key.name]), self.consumers))
         self.data = data
 
-    def getMostValued(self) -> tuple[NPVConsumerList, NPVProducerList]:
-        npv_consumers: NPVConsumerList = []
-        npv_producers: NPVProducerList = []
-        for k in list(self.data.keys()):
-            data = self.data[k]
-            npv = 0
-            for i in range(len(self.data[k])):
-                npv += data[i] * ((1 - DISCONT) ** i)
-            if k in self.consumers_names:
-                npv_consumers.append((k, npv))
-            else:
-                npv_producers.append((k, npv))
-        npv_consumers = sorted(npv_consumers, key=lambda x: x[1], reverse=True)
-        npv_producers = sorted(npv_producers, key=lambda x: x[1], reverse=True)
-        # max_producer_idx = np.argmax(self.producers_sums)
-        # max_consumer_idx = np.argmax(self.consumers_sums)
-        # most_valued_producer = MostValuedProducer(
-        # self.producers_names[max_producer_idx],
-        # self.producers_sums[max_producer_idx])
-        # most_valued_consumer = MostValuedConsumer(
-        # self.consumers_names[max_consumer_idx],
-        # self.consumers_sums[max_consumer_idx])
-        print(npv_consumers, npv_producers)
-        return (npv_consumers, npv_producers)
+    def getMostValued(self) -> tuple[MostValuedConsumer, MostValuedProducer]:
+        # npv_consumers: NPVConsumerList = []
+        # npv_producers: NPVProducerList = []
+        # for k in list(self.data.keys()):
+        #     data = self.data[k]
+        #     npv = 0
+        #     for i in range(len(self.data[k])):
+        #         npv += data[i] * ((1 - DISCONT) ** i)
+        #     if k in self.consumers_names:
+        #         npv_consumers.append((k, npv))
+        #     else:
+        #         npv_producers.append((k, npv))
+        # npv_consumers = sorted(npv_consumers, key=lambda x: x[1], reverse=True)
+        # npv_producers = sorted(npv_producers, key=lambda x: x[1], reverse=True)
+        max_producer_idx = np.argmax(self.producers_sums)
+        max_consumer_idx = np.argmax(self.consumers_sums)
+        most_valued_producer = MostValuedProducer(
+            self.producers_names[max_producer_idx],
+            self.producers_sums[max_producer_idx])
+        most_valued_consumer = MostValuedConsumer(
+            self.consumers_names[max_consumer_idx],
+            self.consumers_sums[max_consumer_idx])
+
+        return (most_valued_consumer, most_valued_producer)
 
     def get_mod2(self, objects_count: int):
         return 1 - ((objects_count + self.objects_count - self.bought_objects_count) / objects_count)
+
+    def get_mod3(self, mes: float) -> float:
+        return mes / abs(mes)
+
+    def get_base_value4(self, object_name: ProducerName | ConsumerName, enemy_bet: float):
+        return (self.bs3[object_name] + enemy_bet) / 2
+
+    def get_base_value3(self) -> pd.DataFrame:
+        mes = self.get_mean_energy_store()
+        mod3 = self.get_mod3(mes)
+        self.bs3 = {}
+
+        for k in list(self.bs1.keys()):
+            if k in self.consumers_names:
+                self.bs3[k] = self.bs2[k] * (1 + mod3)
+            else:
+                self.bs3[k] = self.bs2[k] * (1 - mod3)
+
+        return pd.DataFrame([self.bs3.keys(), self.bs3.values()])
 
     def get_base_value2(self):
         loss = 0
@@ -134,13 +153,14 @@ class DataProcessor():
         for k in list(self.producer_objects.keys()):
             store += len(self.producer_objects[k]) * self.data[k]
 
+        self.bs2 = {}
         for k in list(self.data.keys()):
             if k in self.consumers_names:
-                self.data[k] = self.data[k] * store / loss
+                self.bs2[k] = self.bs1[k] * store / loss
             else:
-                self.data[k] = self.data[k] * loss / store
+                self.bs2[k] = self.bs1[k] * loss / store
 
-        return self.data
+        return pd.DataFrame([self.bs2.keys(), self.bs2.values()])
 
     def get_base_value_1(self, mod2: float) -> pd.DataFrame:
         self.bs1 = self.bs0 * (1 + mod2)
@@ -192,7 +212,7 @@ class DataProcessor():
 
         self.bought_objects_count += 1
 
-    def get_mean_energy_store(self) -> np.floating:
+    def get_mean_energy_store(self):
         mean_wind = np.mean(self.data['Ветер'])
         mean_sun = np.mean(self.data['Солнце'])
         mean_house = np.mean(self.data['Дома'])
