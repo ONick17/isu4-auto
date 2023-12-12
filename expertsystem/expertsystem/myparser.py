@@ -5,6 +5,7 @@ from typing import TypeAlias, Literal, DefaultDict
 from collections import defaultdict
 from dataclasses import dataclass
 
+
 CONSUMER_MAX_VALUE = 10
 PRODUCER_MAX_VALUE = 20
 
@@ -125,17 +126,28 @@ class DataProcessor():
         return 1 - ((objects_count + self.objects_count - self.bought_objects_count) / objects_count)
 
     def get_mod3(self, mes: float) -> float:
-        return mes / abs(mes)
+        if mes != 0:
+            return mes / abs(mes)
+        else:
+            return 0
 
     def get_base_value4(self, object_name: ProducerName | ConsumerName, enemy_bet: float):
-        return (self.bs3[object_name] + enemy_bet) / 2
+        bs4 = (self.bs3[object_name] + enemy_bet) / 2
+        return {
+            'Солнце': bs4['Солнце'][0],
+            'Ветер': bs4['Ветер'][0],
+            'Больницы': bs4['Больницы'][0],
+            'Дома': bs4['Дома'][0],
+            'Заводы': bs4['Заводы'][0]
+        }
 
     def get_base_value3(self) -> pd.DataFrame:
         mes = self.get_mean_energy_store()
+        print(mes)
         mod3 = self.get_mod3(mes)
         self.bs3 = {}
 
-        for k in list(self.bs1.keys()):
+        for k in list(self.bs2.keys()):
             if k in self.consumers_names:
                 self.bs3[k] = self.bs2[k] * (1 + mod3)
             else:
@@ -146,20 +158,26 @@ class DataProcessor():
     def get_base_value2(self):
         loss = 0
         for k in list(self.consumer_objects.keys()):
-            loss += len(self.consumer_objects[k]) * self.data[k]
+            loss += len(self.consumer_objects[k]) * self.data[k].values
 
         store = 0
 
         for k in list(self.producer_objects.keys()):
-            store += len(self.producer_objects[k]) * self.data[k]
+            store += len(self.producer_objects[k]) * self.data[k].values
 
         self.bs2 = {}
         for k in list(self.data.keys()):
             if k in self.consumers_names:
-                self.bs2[k] = self.bs1[k] * store / loss
+                cf = store + loss
+                if loss == 0 and store == 0:
+                    cf = 1
+                self.bs2[k] = self.bs1[k].values * \
+                    (1 - (store - loss) / cf)
             else:
-                self.bs2[k] = self.bs1[k] * loss / store
-
+                cf = store + loss
+                if store == 0 and loss == 0:
+                    cf = 1
+                self.bs2[k] = self.bs1[k].values * (1 - (loss - store) / cf)
         return pd.DataFrame.from_dict(self.bs2, orient='columns')
 
     def get_base_value_1(self, objects_count: int) -> pd.DataFrame:
@@ -213,6 +231,60 @@ class DataProcessor():
             self.objects_count += 1
 
         self.bought_objects_count += 1
+
+    def reset(self) -> None:
+        self.consumer_enemy_objects: DefaultDict[
+            ConsumerName, list[Tariff]] = defaultdict(lambda: [])
+        self.producer_enemy_objects: DefaultDict[ProducerName, list[Tariff]] = defaultdict(
+            lambda: [])
+        self.objects_count = 0
+        self.enemy_objects_count = 0
+        self.bought_objects_count = self.objects_count
+
+    def remove(self, object_name: ProducerName | ConsumerName, tariff: Tariff, enemy: bool) -> None:
+        if enemy:
+            if object_name in self.consumers_names:
+                self.consumer_enemy_objects[object_name].remove(tariff)
+            else:
+                self.producer_enemy_objects[object_name].remove(tariff)
+        else:
+            if object_name in self.consumers_names:
+                self.consumer_objects[object_name].remove(tariff)
+            else:
+                self.producer_objects[object_name].remove(tariff)
+
+    def get_values(self, objects_count: int):
+        self.get_base_value_0()
+        self.get_base_value_1(objects_count)
+        self.get_base_value2()
+        bs = self.get_base_value3()
+        return {
+            'Солнце': bs['Солнце'][0],
+            'Ветер': bs['Ветер'][0],
+            'Больницы': bs['Больницы'][0],
+            'Дома': bs['Дома'][0],
+            'Заводы': bs['Заводы'][0]
+        }
+
+    def get_data_for_graphics(self) -> dict[ProducerName | ConsumerName, float]:
+        result: dict[ProducerName | ConsumerName, float] = {}
+        for k in list(self.data.keys()):
+            if k.startswith('Ветер'):
+                result[k] = self.data[k].values * \
+                    len(self.producer_objects['Ветер'])
+            elif k.startswith('Солнце'):
+                result[k] = self.data[k].values * \
+                    len(self.producer_objects['Солнце'])
+            elif k.startswith('Дома'):
+                result[k] = self.data[k].values * \
+                    len(self.consumer_objects['Дома'])
+            elif k.startswith('Заводы'):
+                result[k] = self.data[k].values * \
+                    len(self.consumer_objects['Заводы'])
+            elif k.startswith('Больницы'):
+                result[k] = self.data[k].values * \
+                    len(self.consumer_objects['Больницы'])
+        return result
 
     def get_mean_energy_store(self):
         mean_wind = np.mean(self.data['Ветер'])

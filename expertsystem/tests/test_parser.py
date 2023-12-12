@@ -100,6 +100,8 @@ def test_get_mod2():
     assert proc.objects_count == 2
 
 # С остальными base_value алгоритм взаимодействия такой же
+
+
 def test_base_value_1():
     proc = DataProcessor()
     data = pd.DataFrame({
@@ -119,3 +121,31 @@ def test_base_value_1():
     # Приходится использовать [0], так как это лист
     assert round(proc.get_base_value_1(5)['Больницы'][0], 2) == round(
         2.0 * (1 + proc.get_mod2(5)), 2)
+
+
+def test_get_graphics():
+    proc = DataProcessor()
+    data = pd.DataFrame({
+        'Солнце': [5.5, 5.5],
+        'Ветер': [3.4, 2.3],
+        'Дома': [4.0, 5.0],
+        'Заводы': [2.0, 5.0],
+        'Больницы': [3.0, 1.0]
+    })
+    data = proc.parse('./expertsystem/forecast.csv')
+    proc.prepare_data(data)
+    bs0 = proc.get_base_value_0()
+    proc.add_object(GameObject('Солнце', 4), False)
+    proc.add_object(GameObject('Больницы', 4), False)
+    proc.add_object(GameObject('Дома', 4), True)
+    # print(proc.get_base_value_1(5)['Больницы'])
+    # Приходится использовать [0], так как это лист
+    # print(proc.data)
+    print(proc.get_data_for_graphics())
+
+def test_get_values():
+    proc = DataProcessor()
+    data = proc.parse('./expertsystem/forecast.csv')
+    proc.prepare_data(data)
+    bs = proc.get_values(5)
+    pprint(bs)
