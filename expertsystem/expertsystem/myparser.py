@@ -231,6 +231,7 @@ class DataProcessor():
                (factory_count * mean_factory) -\
                (hospital_count * mean_hospital)
 
+
     def show(self, data: pd.DataFrame):
         for building in list(data.keys()):
             plt.plot(data[building], label=building)

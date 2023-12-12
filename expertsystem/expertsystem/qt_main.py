@@ -14,7 +14,7 @@ import pandas as pd
 
 from qt_new_objects import DialogNewObjects
 from qt_add_object import DialogAddObject
-from myparser import parse
+from myparser import DataProcessor
 
 
 
@@ -51,6 +51,7 @@ class MyMainWindow(object):
         self.my_objects = pd.DataFrame({"object": [], "price": []})
         self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
         self.qt_widget = None
+        self.data_processor = DataProcessor()
 
 
     def setupUi(self, MainWindow):
@@ -110,66 +111,66 @@ class MyMainWindow(object):
         self.lbl_deviations.setFont(font)
         self.lbl_deviations.setObjectName("lbl_deviations")
         # Выбор погрешности для:
-        # "СЭС"
+        # "Солнце"
         self.lbl_deviation_sun = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_sun.setGeometry(QtCore.QRect(20, 135, 30, 20))
+        self.lbl_deviation_sun.setGeometry(QtCore.QRect(20, 135, 50, 20))
         self.lbl_deviation_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_sun.setObjectName("lbl_deviation_sun")
-        # СЭС
+        # Солнце
         self.lstbox_deviation_sun = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_sun.setGeometry(QtCore.QRect(50, 135, 50, 20))
+        self.lstbox_deviation_sun.setGeometry(QtCore.QRect(70, 135, 55, 20))
         self.lstbox_deviation_sun.setObjectName("lstbox_deviation_sun")
         self.lstbox_deviation_sun.addItem("+25%")
         self.lstbox_deviation_sun.addItem("0%")
         self.lstbox_deviation_sun.addItem("-17%")
         self.lstbox_deviation_sun.setCurrentIndex(1)
-        # "ВЭС"
+        # "Ветер"
         self.lbl_deviation_wind = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_wind.setGeometry(QtCore.QRect(110, 135, 30, 20))
+        self.lbl_deviation_wind.setGeometry(QtCore.QRect(130, 135, 40, 20))
         self.lbl_deviation_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_wind.setObjectName("lbl_deviation_wind")
-        # ВЭС
+        # Ветер
         self.lstbox_deviation_wind = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_wind.setGeometry(QtCore.QRect(140, 135, 50, 20))
+        self.lstbox_deviation_wind.setGeometry(QtCore.QRect(170, 135, 55, 20))
         self.lstbox_deviation_wind.setObjectName("lstbox_deviation_wind")
         self.lstbox_deviation_wind.addItem("+25%")
         self.lstbox_deviation_wind.addItem("0%")
         self.lstbox_deviation_wind.addItem("-17%")
         self.lstbox_deviation_wind.setCurrentIndex(1)
-        # "Микрорайон"
+        # "Дома"
         self.lbl_deviation_house = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_house.setGeometry(QtCore.QRect(200, 135, 80, 20))
+        self.lbl_deviation_house.setGeometry(QtCore.QRect(230, 135, 80, 20))
         self.lbl_deviation_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_house.setObjectName("lbl_deviation_house")
-        # Микрорайон
+        # Дома
         self.lstbox_deviation_house = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_house.setGeometry(QtCore.QRect(280, 135, 50, 20))
+        self.lstbox_deviation_house.setGeometry(QtCore.QRect(310, 135, 55, 20))
         self.lstbox_deviation_house.setObjectName("lstbox_deviation_house")
         self.lstbox_deviation_house.addItem("+25%")
         self.lstbox_deviation_house.addItem("0%")
         self.lstbox_deviation_house.addItem("-17%")
         self.lstbox_deviation_house.setCurrentIndex(1)
-        # "Завод"
+        # "Заводы"
         self.lbl_deviation_factory = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_factory.setGeometry(QtCore.QRect(340, 135, 40, 20))
+        self.lbl_deviation_factory.setGeometry(QtCore.QRect(370, 135, 40, 20))
         self.lbl_deviation_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_factory.setObjectName("lbl_deviation_factory")
-        # Завод
+        # Заводы
         self.lstbox_deviation_factory = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_factory.setGeometry(QtCore.QRect(380, 135, 50, 20))
+        self.lstbox_deviation_factory.setGeometry(QtCore.QRect(410, 135, 55, 20))
         self.lstbox_deviation_factory.setObjectName("lstbox_deviation_factory")
         self.lstbox_deviation_factory.addItem("+25%")
         self.lstbox_deviation_factory.addItem("0%")
         self.lstbox_deviation_factory.addItem("-17%")
         self.lstbox_deviation_factory.setCurrentIndex(1)
-        # "Больница"
+        # "Больницы"
         self.lbl_deviation_hospital = QtWidgets.QLabel(parent=self.centralwidget)
-        self.lbl_deviation_hospital.setGeometry(QtCore.QRect(440, 135, 60, 20))
+        self.lbl_deviation_hospital.setGeometry(QtCore.QRect(470, 135, 60, 20))
         self.lbl_deviation_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_deviation_hospital.setObjectName("lbl_deviation_hospital")
-        # Больница
+        # Больницы
         self.lstbox_deviation_hospital = QtWidgets.QComboBox(parent=self.centralwidget)
-        self.lstbox_deviation_hospital.setGeometry(QtCore.QRect(500, 135, 50, 20))
+        self.lstbox_deviation_hospital.setGeometry(QtCore.QRect(530, 135, 55, 20))
         self.lstbox_deviation_hospital.setObjectName("lstbox_deviation_hospital")
         self.lstbox_deviation_hospital.addItem("+25%")
         self.lstbox_deviation_hospital.addItem("0%")
@@ -232,61 +233,61 @@ class MyMainWindow(object):
 
         # Число объектов:
         # font.setPointSize(8)
-        # "СЭС"
+        # "Солнце"
         self.lbl_count_sun = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_sun.setGeometry(QtCore.QRect(10, 70, 40, 20))
         self.lbl_count_sun.setFont(font)
         self.lbl_count_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_sun.setObjectName("lbl_count_sun")
-        # СЭС
+        # Солнце
         self.lbl_count_sun2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_sun2.setGeometry(QtCore.QRect(50, 70, 100, 20))
         self.lbl_count_sun2.setFont(font)
         self.lbl_count_sun2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_sun2.setObjectName("lbl_count_sun2")
-        # "ВЭС"
+        # "Ветер"
         self.lbl_count_wind = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_wind.setGeometry(QtCore.QRect(10, 100, 40, 20))
         self.lbl_count_wind.setFont(font)
         self.lbl_count_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_wind.setObjectName("lbl_count_wind")
-        # ВЭС
+        # Ветер
         self.lbl_count_wind2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_wind2.setGeometry(QtCore.QRect(50, 100, 100, 20))
         self.lbl_count_wind2.setFont(font)
         self.lbl_count_wind2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_wind2.setObjectName("lbl_count_wind2")
-        # "МИКРОРАЙОН"
+        # "Дома"
         self.lbl_count_house = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_house.setGeometry(QtCore.QRect(200, 70, 80, 20))
         self.lbl_count_house.setFont(font)
         self.lbl_count_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_house.setObjectName("lbl_count_house")
-        # МИКРОРАЙОН
+        # Дома
         self.lbl_count_house2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_house2.setGeometry(QtCore.QRect(280, 70, 100, 20))
         self.lbl_count_house2.setFont(font)
         self.lbl_count_house2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_house2.setObjectName("lbl_count_house2")
-        # "ЗАВОД"
+        # "Заводы"
         self.lbl_count_factory = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_factory.setGeometry(QtCore.QRect(200, 100, 80, 20))
         self.lbl_count_factory.setFont(font)
         self.lbl_count_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_factory.setObjectName("lbl_count_factory")
-        # ЗАВОД
+        # Заводы
         self.lbl_count_factory2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_factory2.setGeometry(QtCore.QRect(280, 100, 100, 20))
         self.lbl_count_factory2.setFont(font)
         self.lbl_count_factory2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_count_factory2.setObjectName("lbl_count_factory2")
-        # "БОЛЬНИЦА"
+        # "Больницы"
         self.lbl_count_hospital = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_hospital.setGeometry(QtCore.QRect(200, 130, 80, 20))
         self.lbl_count_hospital.setFont(font)
         self.lbl_count_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_count_hospital.setObjectName("lbl_count_hospital")
-        # БОЛЬНИЦА
+        # Больницы
         self.lbl_count_hospital2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_count_hospital2.setGeometry(QtCore.QRect(280, 130, 100, 20))
         self.lbl_count_hospital2.setFont(font)
@@ -301,61 +302,61 @@ class MyMainWindow(object):
         self.lbl_best_prices.setObjectName("lbl_best_prices")
         # Рекоммендованные цены для:
         # font.setPointSize(8)
-        # "СЭС"
+        # "Солнце"
         self.lbl_price_sun = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_sun.setGeometry(QtCore.QRect(10, 200, 40, 20))
         self.lbl_price_sun.setFont(font)
         self.lbl_price_sun.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_sun.setObjectName("lbl_price_sun")
-        # СЭС
+        # Солнце
         self.lbl_price_sun2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_sun2.setGeometry(QtCore.QRect(50, 200, 30, 20))
         self.lbl_price_sun2.setFont(font)
         self.lbl_price_sun2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_sun2.setObjectName("lbl_price_sun2")
-        # "ВЭС"
+        # "Ветер"
         self.lbl_price_wind = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_wind.setGeometry(QtCore.QRect(10, 230, 40, 20))
         self.lbl_price_wind.setFont(font)
         self.lbl_price_wind.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_wind.setObjectName("lbl_price_wind")
-        # ВЭС
+        # Ветер
         self.lbl_price_wind2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_wind2.setGeometry(QtCore.QRect(50, 230, 30, 20))
         self.lbl_price_wind2.setFont(font)
         self.lbl_price_wind2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_wind2.setObjectName("lbl_price_wind2")
-        # "Микрорайон"
+        # "Дома"
         self.lbl_price_house = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_house.setGeometry(QtCore.QRect(200, 200, 80, 20))
         self.lbl_price_house.setFont(font)
         self.lbl_price_house.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_house.setObjectName("lbl_price_house")
-        # Микрорайон
+        # Дома
         self.lbl_price_house2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_house2.setGeometry(QtCore.QRect(280, 200, 30, 20))
         self.lbl_price_house2.setFont(font)
         self.lbl_price_house2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_house2.setObjectName("lbl_price_house2")
-        # "Завод"
+        # "Заводы"
         self.lbl_price_factory = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_factory.setGeometry(QtCore.QRect(200, 230, 80, 20))
         self.lbl_price_factory.setFont(font)
         self.lbl_price_factory.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_factory.setObjectName("lbl_price_factory")
-        # Завод
+        # Заводы
         self.lbl_price_factory2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_factory2.setGeometry(QtCore.QRect(280, 230, 30, 20))
         self.lbl_price_factory2.setFont(font)
         self.lbl_price_factory2.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight|QtCore.Qt.AlignmentFlag.AlignTrailing|QtCore.Qt.AlignmentFlag.AlignVCenter)
         self.lbl_price_factory2.setObjectName("lbl_price_factory2")
-        # "Больница"
+        # "Больницы"
         self.lbl_price_hospital = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_hospital.setGeometry(QtCore.QRect(200, 260, 80, 20))
         self.lbl_price_hospital.setFont(font)
         self.lbl_price_hospital.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.lbl_price_hospital.setObjectName("lbl_price_hospital")
-        # Больница
+        # Больницы
         self.lbl_price_hospital2 = QtWidgets.QLabel(parent=self.group_shop)
         self.lbl_price_hospital2.setGeometry(QtCore.QRect(280, 260, 30, 20))
         self.lbl_price_hospital2.setFont(font)
@@ -411,14 +412,14 @@ class MyMainWindow(object):
     # Перевод текста
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "СтИЭС - Помощник"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Экспертная система принятия решений для ИЭС"))
         self.lbl_plot_mode.setText(_translate("MainWindow", "График"))
         self.lbl_plot_show.setText(_translate("MainWindow", "Показывать"))
-        self.lbl_deviation_sun.setText(_translate("MainWindow", "СЭС"))
+        self.lbl_deviation_sun.setText(_translate("MainWindow", "Солнце"))
         self.btn_select_file.setText(_translate("MainWindow", "Выбрать файл"))
         self.lbl_deviations.setText(_translate("MainWindow", "Отклонение данных"))
         self.lbl_select_file.setText(_translate("MainWindow", "Для начала работы выберите CSV-файл"))
-        self.lbl_deviation_wind.setText(_translate("MainWindow", "ВЭС"))
+        self.lbl_deviation_wind.setText(_translate("MainWindow", "Ветер"))
         self.lbl_deviation_house.setText(_translate("MainWindow", "Микрорайон"))
         self.lbl_deviation_factory.setText(_translate("MainWindow", "Завод"))
         self.lbl_deviation_hospital.setText(_translate("MainWindow", "Больница"))
@@ -494,7 +495,7 @@ class MyMainWindow(object):
         else:
             #Чтение ожидаемого файла
             try:
-                self.data_forecast = parse(fl)
+                self.data_forecast = self.data_processor.parse(fl)
                 self.change_pyplot_data()
                 self.update_mean_labels()
                 self.update_price_labels()
@@ -508,90 +509,89 @@ class MyMainWindow(object):
         try:
             # Очистка графика
             self.pyplot.axes.cla()
-            if self.data_forecast:
-                # 0 - всё
-                # 1 - производители
-                # 2 - потребители
-                show = self.lstbox_plot_show.currentIndex()
-                if (show == 0):
-                    to_show = {"Солнце": [], "Ветер": [], "Микрорайон": [], "Завод": [], "Больница": []}
-                elif (show == 1):
-                    to_show = {"Солнце": [], "Ветер": []}
-                else:
-                    to_show = {"Микрорайон": [], "Завод": [], "Больница": []}
-                # 0 - +25
-                # 1 - 0
-                # 2 - -17
-                sun = self.lstbox_deviation_sun.currentIndex()
-                wind = self.lstbox_deviation_wind.currentIndex()
-                house = self.lstbox_deviation_house.currentIndex()
-                factory = self.lstbox_deviation_factory.currentIndex()
-                hospital = self.lstbox_deviation_hospital.currentIndex()
+            if type(self.data_forecast) == pd.DataFrame:
+                if not self.data_forecast.empty:
+                    # 0 - всё
+                    # 1 - производители
+                    # 2 - потребители
+                    show = self.lstbox_plot_show.currentIndex()
+                    if (show == 0):
+                        to_show = {"Солнце": [], "Ветер": [], "Дома": [], "Заводы": [], "Больницы": []}
+                    elif (show == 1):
+                        to_show = {"Солнце": [], "Ветер": []}
+                    else:
+                        to_show = {"Дома": [], "Заводы": [], "Больницы": []}
+                    # 0 - +25
+                    # 1 - 0
+                    # 2 - -17
+                    sun = self.lstbox_deviation_sun.currentIndex()
+                    wind = self.lstbox_deviation_wind.currentIndex()
+                    house = self.lstbox_deviation_house.currentIndex()
+                    factory = self.lstbox_deviation_factory.currentIndex()
+                    hospital = self.lstbox_deviation_hospital.currentIndex()
 
-                # Определение обращений к датафрейму по выбраным отклонениям данных
-                if (sun == 0):
-                    sun = "sun25"
-                elif (sun == 1):
-                    sun = "sun0"
-                else:
-                    sun = "sun17"
-                if (wind == 0):
-                    wind = "wind25"
-                elif (wind == 1):
-                    wind = "wind0"
-                else:
-                    wind = "wind17"
-                if (house == 0):
-                    house = "house25"
-                elif (house == 1):
-                    house = "house0"
-                else:
-                    house = "house17"
-                if (factory == 0):
-                    factory = "factory25"
-                elif (factory == 1):
-                    factory = "factory0"
-                else:
-                    factory = "factory17"
-                if (hospital == 0):
-                    hospital = "hospital25"
-                elif (hospital == 1):
-                    hospital = "hospital0"
-                else:
-                    hospital = "hospital17"
-                
-                # Множители для графика
-                # 0 - Оригинальный прогноз
-                # 1 - Прогноз по вашим объектам
-                mode = self.lstbox_plot_mode.currentIndex()
-                if (mode == 0):
-                    sun_count = 1
-                    wind_count = 1
-                    house_count = 1
-                    factory_count = 1
-                    hospital_count = 1
-                else:
-                    sun_count = self.objects_count["СЭС"]
-                    wind_count = self.objects_count["ВЭС"]
-                    house_count = self.objects_count["Микрорайон"]
-                    factory_count = self.objects_count["Завод"]
-                    hospital_count = self.objects_count["Больница"]
-                
-                # Сбор графика
-                for building in list(to_show.keys()):
-                    if building == "Солнце":
-                        self.pyplot.axes.plot(self.data_forecast.loc[:, sun]*sun_count, label="Солнце")
-                    elif building == "Ветер":
-                        self.pyplot.axes.plot(self.data_forecast.loc[:, wind]*wind_count, label="Ветер")
-                    elif building == "Микрорайон":
-                        self.pyplot.axes.plot(self.data_forecast.loc[:, house]*house_count, label="Микрорайон")
-                    elif building == "Завод":
-                        self.pyplot.axes.plot(self.data_forecast.loc[:, factory]*factory_count, label="Завод")
-                    elif building == "Больница":
-                        self.pyplot.axes.plot(self.data_forecast.loc[:, hospital]*hospital_count, label="Больница")
-                # plt.legend(list(data.keys()))
-                self.pyplot.axes.legend()
-                self.pyplot.draw()
+                    # Определение обращений к датафрейму по выбраным отклонениям данных
+                    if (sun == 0):
+                        sun = "Солнце25"
+                    elif (sun == 1):
+                        sun = "Солнце"
+                    else:
+                        sun = "Солнце17"
+                    if (wind == 0):
+                        wind = "Ветер25"
+                    elif (wind == 1):
+                        wind = "Ветер"
+                    else:
+                        wind = "Ветер17"
+                    if (house == 0):
+                        house = "Дома25"
+                    elif (house == 1):
+                        house = "Дома"
+                    else:
+                        house = "Дома17"
+                    if (factory == 0):
+                        factory = "Заводы25"
+                    elif (factory == 1):
+                        factory = "Заводы"
+                    else:
+                        factory = "Заводы17"
+                    if (hospital == 0):
+                        hospital = "Больницы25"
+                    elif (hospital == 1):
+                        hospital = "Больницы"
+                    else:
+                        hospital = "Больницы17"
+                    # Множители для графика
+                    # 0 - Оригинальный прогноз
+                    # 1 - Прогноз по вашим объектам
+                    mode = self.lstbox_plot_mode.currentIndex()
+                    if (mode == 0):
+                        sun_count = 1
+                        wind_count = 1
+                        house_count = 1
+                        factory_count = 1
+                        hospital_count = 1
+                    else:
+                        sun_count = self.my_objects_count["СЭС"]
+                        wind_count = self.my_objects_count["ВЭС"]
+                        house_count = self.my_objects_count["Микрорайон"]
+                        factory_count = self.my_objects_count["Завод"]
+                        hospital_count = self.my_objects_count["Больница"]
+                    # Сбор графика
+                    for building in list(to_show.keys()):
+                        if building == "Солнце":
+                            self.pyplot.axes.plot(self.data_forecast.loc[:, sun]*sun_count, label="Солнце")
+                        elif building == "Ветер":
+                            self.pyplot.axes.plot(self.data_forecast.loc[:, wind]*wind_count, label="Ветер")
+                        elif building == "Дома":
+                            self.pyplot.axes.plot(self.data_forecast.loc[:, house]*house_count, label="Дома")
+                        elif building == "Заводы":
+                            self.pyplot.axes.plot(self.data_forecast.loc[:, factory]*factory_count, label="Заводы")
+                        elif building == "Больницы":
+                            self.pyplot.axes.plot(self.data_forecast.loc[:, hospital]*hospital_count, label="Больницы")
+                    # plt.legend(list(data.keys()))
+                    self.pyplot.axes.legend()
+                    self.pyplot.draw()
         except Exception as error:
             print("функция change_pyplot_data")
             print(error)
@@ -637,6 +637,7 @@ class MyMainWindow(object):
                 self.table_my_objects.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(str(new_data[1])))
                 self.table_my_objects.setCellWidget(rowPosition, 2, deleteButton)
                 self.my_objects_count[ind_to_object[new_data[0]]] += 1
+                self.change_pyplot_data()
                 self.update_count_labels()
                 self.update_mean_labels()
                 self.update_price_labels()
@@ -683,6 +684,7 @@ class MyMainWindow(object):
                 indexToDrop = self.my_objects[(self.my_objects.object == object) & (self.my_objects.price == price)].index[0]
                 self.my_objects = self.my_objects.drop(indexToDrop)
                 self.table_my_objects.removeRow(row)
+                self.change_pyplot_data()
                 self.update_count_labels()
                 self.update_mean_labels()
                 self.update_price_labels()
@@ -713,9 +715,9 @@ class MyMainWindow(object):
     def update_mean_labels(self):
         try:
             #"0МВт"
-            self.lbl_mean_energy2.setText(str() + "МВт")
-            self.lbl_mean_lost2.setText(str() + "МВт")
+            self.lbl_mean_energy2.setText(str(int(self.data_processor.get_mean_energy_store())) + "МВт")
             
+            #self.lbl_mean_lost2.setText(str() + "МВт")
             # Максимальный уровень потерь в 20% достигается при суммарной мощности на ветке в 18 МВт независимо от того, генератор или потребитель находятся на этой ветке.
             # Ожидаемые потери: 20%, если больше или равно 18МВт. ?%, если меньше 18МВт
             # Предположение: (x/4)^2=процент потери, где x - текущая энергия
@@ -723,13 +725,29 @@ class MyMainWindow(object):
         except Exception as error:
             print("функция update_mean_labels")
             print(error)
+            self.lbl_mean_energy2.setText("0МВт")
+            self.lbl_mean_lost2.setText("0МВт")
 
 
     # TODO
     # Подсчёт рекомендуемых ценников
+    """
+    получить по каждому из модификаторов значение от 0 до 20, затем просуммировать их и поделить на 100.
+    Если модификаторов 5, то в конце получится число от 0 до 1: ни больше, ни меньше 100%. И это и была бы ценность объекта.
+    """
     def update_price_labels(self):
-        self.lbl_price_sun2.setText(str())
-        self.lbl_price_wind2.setText(str())
-        self.lbl_price_house2.setText(str())
-        self.lbl_price_factory2.setText(str())
-        self.lbl_price_hospital2.setText(str())
+        try:
+            data = self.data_processor.get_base_values()
+            self.lbl_price_sun2.setText(str(data["Солнце"]))
+            self.lbl_price_wind2.setText(str(data["Ветер"]))
+            self.lbl_price_house2.setText(str(data["Дома"]))
+            self.lbl_price_factory2.setText(str(data["Заводы"]))
+            self.lbl_price_hospital2.setText(str(data["Больницы"]))
+        except Exception as error:
+            print("функция update_price_labels")
+            print(error)
+            self.lbl_price_sun2.setText("0")
+            self.lbl_price_wind2.setText("0")
+            self.lbl_price_house2.setText("0")
+            self.lbl_price_factory2.setText("0")
+            self.lbl_price_hospital2.setText("0")
