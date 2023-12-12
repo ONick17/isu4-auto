@@ -160,9 +160,10 @@ class DataProcessor():
             else:
                 self.bs2[k] = self.bs1[k] * loss / store
 
-        return pd.DataFrame([self.bs2.keys(), self.bs2.values()])
+        return pd.DataFrame.from_dict(self.bs2, orient='columns')
 
-    def get_base_value_1(self, mod2: float) -> pd.DataFrame:
+    def get_base_value_1(self, objects_count: int) -> pd.DataFrame:
+        mod2 = self.get_mod2(objects_count)
         self.bs1 = self.bs0 * (1 + mod2)
         return self.bs1
 
@@ -175,20 +176,21 @@ class DataProcessor():
         for i in range(len(self.consumers)):
             base_value_0 = (self.consumers_sums[i] /
                             consumer_sum) * CONSUMER_MAX_VALUE
-            result[f'{self.consumers_names[i]}'] = base_value_0
-            result[f'{self.consumers_names[i]}17'] = base_value_0 * \
-                (1 - MIN_THRESHOLD)
-            result[f'{self.consumers_names[i]}25'] = base_value_0 * \
-                (1 + MAX_THRESHOLD)
+            result[f'{self.consumers_names[i]}'] = [base_value_0]
+            result[f'{self.consumers_names[i]}17'] = [base_value_0 *
+                                                      (1 - MIN_THRESHOLD)]
+            result[f'{self.consumers_names[i]}25'] = [base_value_0 *
+                                                      (1 + MAX_THRESHOLD)]
         for i in range(len(self.producers)):
             base_value_0 = (self.producers_sums[i] /
-                            producer_sum) * CONSUMER_MAX_VALUE
-            result[f'{self.producers_names[i]}'] = base_value_0
-            result[f'{self.producers_names[i]}17'] = base_value_0 * \
-                (1 - MIN_THRESHOLD)
-            result[f'{self.producers_names[i]}25'] = base_value_0 * \
-                (1 + MAX_THRESHOLD)
-        self.bs0 = pd.DataFrame([list(result.keys()), list(result.values())])
+                            producer_sum) * PRODUCER_MAX_VALUE
+            result[f'{self.producers_names[i]}'] = [base_value_0]
+            result[f'{self.producers_names[i]}17'] = [base_value_0 *
+                                                      (1 - MIN_THRESHOLD)]
+            result[f'{self.producers_names[i]}25'] = [base_value_0 *
+                                                      (1 + MAX_THRESHOLD)]
+
+        self.bs0 = pd.DataFrame.from_dict(result, orient='columns')
         return self.bs0
 
     def add_object(self, object: GameObject, enemy: bool) -> None:
