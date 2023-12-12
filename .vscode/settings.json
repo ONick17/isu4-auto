@@ -3,5 +3,9 @@
         "expertsystem"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.inlayHints.callArgumentNames": "partial",
+    "python.analysis.autoImportCompletion": true,
+    "python.analysis.typeCheckingMode": "basic"
 }
