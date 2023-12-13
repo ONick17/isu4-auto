@@ -11,10 +11,11 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
 from matplotlib.figure import Figure
 import pandas as pd
+import numpy as np 
 
 from qt_new_objects import DialogNewObjects
 from qt_add_object import DialogAddObject
-from myparser import DataProcessor
+from myparser import DataProcessor, GameObject
 
 
 
@@ -30,6 +31,12 @@ object_to_ind = {"СЭС": 0,
                  "Завод": 3,
                  "Больница": 4}
 
+object_to_max = {"СЭС": "Солнце",
+                 "ВЭС": "Ветер",
+                 "Микрорайон": "Дома",
+                 "Завод": "Заводы",
+                 "Больница": "Больницы"}
+
 
 
 # Класс для отображения графиков
@@ -44,12 +51,11 @@ class MplCanvas(FigureCanvasQTAgg):
 #Класс с интерфейсом главного окна
 class MyMainWindow(object):
     def __init__(self):
-        self.data_forecast = None
         self.objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
         self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
         self.my_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
         self.my_objects = pd.DataFrame({"object": [], "price": []})
-        self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+        # self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
         self.qt_widget = None
         self.data_processor = DataProcessor()
 
@@ -495,13 +501,12 @@ class MyMainWindow(object):
         else:
             #Чтение ожидаемого файла
             try:
-                self.data_forecast = self.data_processor.parse(fl)
+                self.data_processor.parse(fl)
                 self.change_pyplot_data()
                 self.update_mean_labels()
                 self.update_price_labels()
             except Exception:
                 self.lbl_select_file.setText("С файлом что-то не так!")
-                self.data_forecast = []
 
 
     # Изменение графика
@@ -509,89 +514,88 @@ class MyMainWindow(object):
         try:
             # Очистка графика
             self.pyplot.axes.cla()
-            if type(self.data_forecast) == pd.DataFrame:
-                if not self.data_forecast.empty:
-                    # 0 - всё
-                    # 1 - производители
-                    # 2 - потребители
-                    show = self.lstbox_plot_show.currentIndex()
-                    if (show == 0):
-                        to_show = {"Солнце": [], "Ветер": [], "Дома": [], "Заводы": [], "Больницы": []}
-                    elif (show == 1):
-                        to_show = {"Солнце": [], "Ветер": []}
-                    else:
-                        to_show = {"Дома": [], "Заводы": [], "Больницы": []}
-                    # 0 - +25
-                    # 1 - 0
-                    # 2 - -17
-                    sun = self.lstbox_deviation_sun.currentIndex()
-                    wind = self.lstbox_deviation_wind.currentIndex()
-                    house = self.lstbox_deviation_house.currentIndex()
-                    factory = self.lstbox_deviation_factory.currentIndex()
-                    hospital = self.lstbox_deviation_hospital.currentIndex()
+            if not self.data_processor.data.empty:
+                # 0 - всё
+                # 1 - производители
+                # 2 - потребители
+                show = self.lstbox_plot_show.currentIndex()
+                if (show == 0):
+                    to_show = {"Солнце": [], "Ветер": [], "Дома": [], "Заводы": [], "Больницы": []}
+                elif (show == 1):
+                    to_show = {"Солнце": [], "Ветер": []}
+                else:
+                    to_show = {"Дома": [], "Заводы": [], "Больницы": []}
+                # 0 - +25
+                # 1 - 0
+                # 2 - -17
+                sun = self.lstbox_deviation_sun.currentIndex()
+                wind = self.lstbox_deviation_wind.currentIndex()
+                house = self.lstbox_deviation_house.currentIndex()
+                factory = self.lstbox_deviation_factory.currentIndex()
+                hospital = self.lstbox_deviation_hospital.currentIndex()
 
-                    # Определение обращений к датафрейму по выбраным отклонениям данных
-                    if (sun == 0):
-                        sun = "Солнце25"
-                    elif (sun == 1):
-                        sun = "Солнце"
-                    else:
-                        sun = "Солнце17"
-                    if (wind == 0):
-                        wind = "Ветер25"
-                    elif (wind == 1):
-                        wind = "Ветер"
-                    else:
-                        wind = "Ветер17"
-                    if (house == 0):
-                        house = "Дома25"
-                    elif (house == 1):
-                        house = "Дома"
-                    else:
-                        house = "Дома17"
-                    if (factory == 0):
-                        factory = "Заводы25"
-                    elif (factory == 1):
-                        factory = "Заводы"
-                    else:
-                        factory = "Заводы17"
-                    if (hospital == 0):
-                        hospital = "Больницы25"
-                    elif (hospital == 1):
-                        hospital = "Больницы"
-                    else:
-                        hospital = "Больницы17"
-                    # Множители для графика
-                    # 0 - Оригинальный прогноз
-                    # 1 - Прогноз по вашим объектам
-                    mode = self.lstbox_plot_mode.currentIndex()
-                    if (mode == 0):
-                        sun_count = 1
-                        wind_count = 1
-                        house_count = 1
-                        factory_count = 1
-                        hospital_count = 1
-                    else:
-                        sun_count = self.my_objects_count["СЭС"]
-                        wind_count = self.my_objects_count["ВЭС"]
-                        house_count = self.my_objects_count["Микрорайон"]
-                        factory_count = self.my_objects_count["Завод"]
-                        hospital_count = self.my_objects_count["Больница"]
-                    # Сбор графика
-                    for building in list(to_show.keys()):
-                        if building == "Солнце":
-                            self.pyplot.axes.plot(self.data_forecast.loc[:, sun]*sun_count, label="Солнце")
-                        elif building == "Ветер":
-                            self.pyplot.axes.plot(self.data_forecast.loc[:, wind]*wind_count, label="Ветер")
-                        elif building == "Дома":
-                            self.pyplot.axes.plot(self.data_forecast.loc[:, house]*house_count, label="Дома")
-                        elif building == "Заводы":
-                            self.pyplot.axes.plot(self.data_forecast.loc[:, factory]*factory_count, label="Заводы")
-                        elif building == "Больницы":
-                            self.pyplot.axes.plot(self.data_forecast.loc[:, hospital]*hospital_count, label="Больницы")
-                    # plt.legend(list(data.keys()))
-                    self.pyplot.axes.legend()
-                    self.pyplot.draw()
+                # Определение обращений к датафрейму по выбраным отклонениям данных
+                if (sun == 0):
+                    sun = "Солнце25"
+                elif (sun == 1):
+                    sun = "Солнце"
+                else:
+                    sun = "Солнце17"
+                if (wind == 0):
+                    wind = "Ветер25"
+                elif (wind == 1):
+                    wind = "Ветер"
+                else:
+                    wind = "Ветер17"
+                if (house == 0):
+                    house = "Дома25"
+                elif (house == 1):
+                    house = "Дома"
+                else:
+                    house = "Дома17"
+                if (factory == 0):
+                    factory = "Заводы25"
+                elif (factory == 1):
+                    factory = "Заводы"
+                else:
+                    factory = "Заводы17"
+                if (hospital == 0):
+                    hospital = "Больницы25"
+                elif (hospital == 1):
+                    hospital = "Больницы"
+                else:
+                    hospital = "Больницы17"
+                # Множители для графика
+                # 0 - Оригинальный прогноз
+                # 1 - Прогноз по вашим объектам
+                mode = self.lstbox_plot_mode.currentIndex()
+                if (mode == 0):
+                    sun_count = 1
+                    wind_count = 1
+                    house_count = 1
+                    factory_count = 1
+                    hospital_count = 1
+                else:
+                    sun_count = self.my_objects_count["СЭС"]
+                    wind_count = self.my_objects_count["ВЭС"]
+                    house_count = self.my_objects_count["Микрорайон"]
+                    factory_count = self.my_objects_count["Завод"]
+                    hospital_count = self.my_objects_count["Больница"]
+                # Сбор графика
+                for building in list(to_show.keys()):
+                    if building == "Солнце":
+                        self.pyplot.axes.plot(self.data_processor.data.loc[:, sun]*sun_count, label="Солнце")
+                    elif building == "Ветер":
+                        self.pyplot.axes.plot(self.data_processor.data.loc[:, wind]*wind_count, label="Ветер")
+                    elif building == "Дома":
+                        self.pyplot.axes.plot(self.data_processor.data.loc[:, house]*house_count, label="Дома")
+                    elif building == "Заводы":
+                        self.pyplot.axes.plot(self.data_processor.data.loc[:, factory]*factory_count, label="Заводы")
+                    elif building == "Больницы":
+                        self.pyplot.axes.plot(self.data_processor.data.loc[:, hospital]*hospital_count, label="Больницы")
+                # plt.legend(list(data.keys()))
+                self.pyplot.axes.legend()
+                self.pyplot.draw()
         except Exception as error:
             print("функция change_pyplot_data")
             print(error)
@@ -612,7 +616,15 @@ class MyMainWindow(object):
                 self.objects_count["Завод"] = new_data[3]
                 self.objects_count["Больница"] = new_data[4]
                 self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
-                self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+                self.data_processor.reset()
+                # self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+                objects_count2 = {}
+                objects_count2["Солнце"] = new_data[0]
+                objects_count2["Ветер"] = new_data[1]
+                objects_count2["Дома"] = new_data[2]
+                objects_count2["Заводы"] = new_data[3]
+                objects_count2["Больницы"] = new_data[4]
+                self.data_processor.set_all_objects_count(objects_count2)
                 self.update_count_labels()
                 self.update_price_labels()
         except Exception as error:
@@ -637,6 +649,7 @@ class MyMainWindow(object):
                 self.table_my_objects.setItem(rowPosition, 1, QtWidgets.QTableWidgetItem(str(new_data[1])))
                 self.table_my_objects.setCellWidget(rowPosition, 2, deleteButton)
                 self.my_objects_count[ind_to_object[new_data[0]]] += 1
+                self.data_processor.add_object(GameObject(object_to_max[ind_to_object[new_data[0]]], new_data[1]), False)
                 self.change_pyplot_data()
                 self.update_count_labels()
                 self.update_mean_labels()
@@ -654,8 +667,9 @@ class MyMainWindow(object):
             dialog_add_object.setupUi(Dialog)
             if Dialog.exec():
                 new_data = dialog_add_object.return_.copy()
-                self.last_prices[ind_to_object[new_data[0]]] = new_data[1]
+                # self.last_prices[ind_to_object[new_data[0]]] = new_data[1]
                 self.enemy_objects_count[ind_to_object[new_data[0]]] += 1
+                self.data_processor.add_object(GameObject(object_to_max[ind_to_object[new_data[0]]], new_data[1]), True)
                 self.update_count_labels()
                 self.update_price_labels()
         except Exception as error:
@@ -666,7 +680,8 @@ class MyMainWindow(object):
     # Очистка списка объектов противника
     def clear_not_my_objects(self):
         self.enemy_objects_count = {"СЭС": 0, "ВЭС": 0, "Микрорайон": 0, "Завод": 0, "Больница": 0}
-        self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
+        self.data_processor.reset()
+        # self.last_prices = {"СЭС": None, "ВЭС": None, "Микрорайон": None, "Завод": None, "Больница": None}
         self.update_count_labels()
         self.update_price_labels()
 
@@ -677,10 +692,11 @@ class MyMainWindow(object):
             button = self.qt_widget.sender()
             if button:
                 row = self.table_my_objects.indexAt(button.pos()).row()
+                price = float(self.table_my_objects.item(row, 1).text())
                 object = self.table_my_objects.item(row, 0).text()
+                self.data_processor.remove(object_to_max[object], price, False)
                 self.my_objects_count[object] -= 1
                 object = object_to_ind[object]
-                price = float(self.table_my_objects.item(row, 1).text())
                 indexToDrop = self.my_objects[(self.my_objects.object == object) & (self.my_objects.price == price)].index[0]
                 self.my_objects = self.my_objects.drop(indexToDrop)
                 self.table_my_objects.removeRow(row)
@@ -710,64 +726,67 @@ class MyMainWindow(object):
             print(error)
 
 
-    # TODO
     # Подсчёт средних счётчиков и вывод информации в лейблах
     def update_mean_labels(self):
-        try:
-            # Вывод среднего накопления энергии
-            #"0МВт"
-            self.lbl_mean_energy2.setText(str(int(self.data_processor.get_mean_energy_store())) + "МВт")
-            
-            # Вывод средней потери энергии за ход из-за КПД проводов
-            """
-            # Максимальный уровень потерь в 20% достигается при суммарной мощности на ветке в 18 МВт независимо от того, генератор или потребитель находятся на этой ветке.
-            # Ожидаемые потери: 20%, если больше или равно 18МВт. ?%, если меньше 18МВт
-            # Предположение: (x/4)^2=процент потери, где x - текущая энергия
-            # Максимальное число веток: 5, если одна миниподстанция
-            # Рассчёт среднего числа производимой энергии за ход
-            mean_lost_plus = mean_sun_energy*self.my_objects_count["СЭС"]+mean_wind_energy*self.my_objects_count["ВЭС"]
-            # Рассчёт примерной потери энергии при передаче от производителей до главной станции
-            if mean_lost_plus > 36:
-                mean_lost_plus *= 0.2
-            elif mean_lost_plus > 18:
-                mean_lost_plus = 18*0.2 + (mean_lost_plus-18)*(((mean_lost_plus-18)/4)**2)/100
-            else:
-                mean_lost_plus = mean_lost_plus * ((mean_lost_plus/4)**2) / 100
+        if not self.data_processor.data.empty:
+            try:
+                # Вывод среднего накопления энергии
+                #"0МВт"
+                self.lbl_mean_energy2.setText(str(int(self.data_processor.get_mean_energy_store())) + "МВт")
+            except Exception as error:
+                print("функция update_mean_labels, lbl_mean_energy2")
+                print(error)
+                self.lbl_mean_energy2.setText("0МВт")
+                
+            try:
+                # Вывод средней потери энергии за ход из-за КПД проводов
+                # Максимальный уровень потерь в 20% достигается при суммарной мощности на ветке в 18 МВт независимо от того, генератор или потребитель находятся на этой ветке.
+                # Ожидаемые потери: 20%, если больше или равно 18МВт. ?%, если меньше 18МВт
+                # Предположение: (x/4)^2=процент потери, где x - текущая энергия
+                # Максимальное число веток: 5, если одна миниподстанция
+                # Рассчёт среднего числа производимой энергии за ход
+                mean_lost_plus = np.mean(self.data_processor.data["Солнце"])*self.my_objects_count["СЭС"]+np.mean(self.data_processor.data["Ветер"])*self.my_objects_count["ВЭС"]
+                # Рассчёт примерной потери энергии при передаче от производителей до главной станции
+                if mean_lost_plus > 36:
+                    mean_lost_plus *= 0.2
+                elif mean_lost_plus > 18:
+                    mean_lost_plus = 18*0.2 + (mean_lost_plus-18)*(((mean_lost_plus-18)/4)**2)/100
+                else:
+                    mean_lost_plus = mean_lost_plus * ((mean_lost_plus/4)**2) / 100
 
-            # Рассчёт среднего числа поглощаемой энергии за ход
-            mean_lost_min = mean_house_energy*self.my_objects_count["Микрорайон"]+mean_factory_energy*self.my_objects_count["Завод"]+mean_hospital_energy*self.my_objects_count["Больница"]
-            # Рассчёт потери энергии при передаче от главной станции до миниподстанции
-            if mean_lost_min > 18:
-                mean_lost_min2 = mean_lost_min*0.2
-                mean_lost_min = mean_lost_min*0.8
-            # Рассчёт потери энергии при передаче от миниподстанции до потребителей
-            if mean_lost_min > 36:
-                mean_lost_min *= 0.2
-            elif mean_lost_min > 18:
-                mean_lost_min = 18*0.2 + (mean_lost_min-18)*(((mean_lost_min-18)/4)**2)/100
-            else:
-                mean_lost_min = mean_lost_min * ((mean_lost_min/4)**2) / 100
-            mean_lost_min += mean_lost_min2
+                # Рассчёт среднего числа поглощаемой энергии за ход
+                mean_lost_min = np.mean(self.data_processor.data["Дома"])*self.my_objects_count["Микрорайон"]+np.mean(self.data_processor.data["Заводы"])*self.my_objects_count["Завод"]+np.mean(self.data_processor.data["Больницы"])*self.my_objects_count["Больница"]
+                # Рассчёт потери энергии при передаче от главной станции до миниподстанции
+                mean_lost_min2 = 0
+                if mean_lost_min > 18:
+                    mean_lost_min2 = mean_lost_min*0.2
+                    mean_lost_min = mean_lost_min*0.8
+                # Рассчёт потери энергии при передаче от миниподстанции до потребителей
+                if mean_lost_min > 36:
+                    mean_lost_min *= 0.2
+                elif mean_lost_min > 18:
+                    mean_lost_min = 18*0.2 + (mean_lost_min-18)*(((mean_lost_min-18)/4)**2)/100
+                else:
+                    mean_lost_min = mean_lost_min * ((mean_lost_min/4)**2) / 100
+                mean_lost_min += mean_lost_min2
 
-            self.lbl_mean_lost2.setText(str(mean_lost_min+mean_lost_plus) + "МВт")
-            """
-        except Exception as error:
-            print("функция update_mean_labels")
-            print(error)
-            self.lbl_mean_energy2.setText("0МВт")
-            self.lbl_mean_lost2.setText("0МВт")
+                self.lbl_mean_lost2.setText(str(int(mean_lost_min+mean_lost_plus)) + "МВт")
+            except Exception as error:
+                print("функция update_mean_labels, lbl_mean_lost2")
+                print(error)
+                self.lbl_mean_lost2.setText("0МВт")
 
 
-    # TODO
     # Подсчёт рекомендуемых ценников
     def update_price_labels(self):
         try:
-            data = self.data_processor.get_base_values()
-            self.lbl_price_sun2.setText(str(data["Солнце"]))
-            self.lbl_price_wind2.setText(str(data["Ветер"]))
-            self.lbl_price_house2.setText(str(data["Дома"]))
-            self.lbl_price_factory2.setText(str(data["Заводы"]))
-            self.lbl_price_hospital2.setText(str(data["Больницы"]))
+            if not self.data_processor.data.empty and self.data_processor.ALL_OBJECTS_COUNT:
+                data = self.data_processor.get_values(self.enemy_objects_count, self.my_objects_count)
+                self.lbl_price_sun2.setText(str(round(data["Солнце"], 2)))
+                self.lbl_price_wind2.setText(str(round(data["Ветер"], 2)))
+                self.lbl_price_house2.setText(str(round(data["Дома"], 2)))
+                self.lbl_price_factory2.setText(str(round(data["Заводы"], 2)))
+                self.lbl_price_hospital2.setText(str(round(data["Больницы"], 2)))
         except Exception as error:
             print("функция update_price_labels")
             print(error)

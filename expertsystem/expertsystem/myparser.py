@@ -16,7 +16,7 @@ DISCONT = 0.02
 
 ProducerName: TypeAlias = Literal['Ветер', 'Солнце']
 ConsumerName: TypeAlias = Literal['Больницы', 'Дома', 'Заводы']
-Tariff: TypeAlias = int
+Tariff: TypeAlias = float
 
 """
 Чистая приведенная стоимость потребляемой энергии
@@ -77,6 +77,7 @@ class DataProcessor():
         self.enemy_objects_count = 0
         self.bought_objects_count = 0
         self.mns = 0
+        self.ALL_OBJECTS_COUNT = None
         # self.ALL_OBJECTS_COUNT: AllObjects = {"Солнце": 0, "Ветер": 0,
         #                                       "Дома": 0, "Заводы": 0, "Больницы": 0}
 
@@ -315,22 +316,25 @@ class DataProcessor():
         return result
 
     def get_mean_energy_store(self):
-        mean_wind = np.mean(self.data['Ветер'])
-        mean_sun = np.mean(self.data['Солнце'])
-        mean_house = np.mean(self.data['Дома'])
-        mean_factory = np.mean(self.data['Заводы'])
-        mean_hospital = np.mean(self.data['Больницы'])
-        hospital_count = len(self.consumer_objects['Больницы'])
-        factory_count = len(self.consumer_objects['Заводы'])
-        house_count = len(self.consumer_objects['Дома'])
-        sun_count = len(self.producer_objects['Солнце'])
-        wind_count = len(self.producer_objects['Ветер'])
-        self.mns = (wind_count * mean_wind) +\
-            (sun_count * mean_sun) -\
-            (house_count * mean_house) -\
-            (factory_count * mean_factory) -\
-            (hospital_count * mean_hospital)
-        return self.mns
+        if not self.data.empty:
+            mean_wind = np.mean(self.data['Ветер'])
+            mean_sun = np.mean(self.data['Солнце'])
+            mean_house = np.mean(self.data['Дома'])
+            mean_factory = np.mean(self.data['Заводы'])
+            mean_hospital = np.mean(self.data['Больницы'])
+            hospital_count = len(self.consumer_objects['Больницы'])
+            factory_count = len(self.consumer_objects['Заводы'])
+            house_count = len(self.consumer_objects['Дома'])
+            sun_count = len(self.producer_objects['Солнце'])
+            wind_count = len(self.producer_objects['Ветер'])
+            self.mns = (wind_count * mean_wind) +\
+                (sun_count * mean_sun) -\
+                (house_count * mean_house) -\
+                (factory_count * mean_factory) -\
+                (hospital_count * mean_hospital)
+            return self.mns
+        else:
+            return 0
 
 
     def show(self, data: pd.DataFrame):
@@ -339,13 +343,14 @@ class DataProcessor():
             plt.legend()
             plt.draw()
 
-    def get_values(self):
-
+    def get_values(self, enemy_objects_count, my_objects_count):
         objects_count = self.ALL_OBJECTS_COUNT
-        enemy_objects_count = {"Солнце": 1, "Ветер": 1,
-                               "Дома": 5, "Заводы": 2, "Больницы": 0}
-        my_objects_count = {"Солнце": 2, "Ветер": 0,
-                            "Дома": 2, "Заводы": 2, "Больницы": 2}
+        enemy_objects_count = {"Солнце": enemy_objects_count["СЭС"], "Ветер": enemy_objects_count["ВЭС"], "Дома": enemy_objects_count["Микрорайон"], "Заводы": enemy_objects_count["Завод"], "Больницы": enemy_objects_count["Больница"]}
+        my_objects_count = {"Солнце": my_objects_count["СЭС"], "Ветер": my_objects_count["ВЭС"], "Дома": my_objects_count["Микрорайон"], "Заводы": my_objects_count["Завод"], "Больницы": my_objects_count["Больница"]}
+        # enemy_objects_count = {"Солнце": 1, "Ветер": 1,
+        #                        "Дома": 5, "Заводы": 2, "Больницы": 0}
+        # my_objects_count = {"Солнце": 2, "Ветер": 0,
+        #                     "Дома": 2, "Заводы": 2, "Больницы": 2}
         # last_prices = {"Солнце": None, "Ветер": 15.5,
         #                "Дома": None, "Заводы": 4, "Больницы": None}
 
