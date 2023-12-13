@@ -1,7 +1,7 @@
 from myparser import DataProcessor
 
 data_processor = DataProcessor()
-data_processor = data_processor.parse('./forecast.csv')
+data_processor = data_processor.parse('./expertsystem/forecast.csv')
 
 objects_count = {"Солнце": 4, "Ветер": 2, "Дома": 8, "Заводы": 4, "Больницы": 3}
 enemy_objects_count = {"Солнце": 1, "Ветер": 1, "Дома": 5, "Заводы": 2, "Больницы": 0}
@@ -42,21 +42,21 @@ prices["Больницы"] = data_processor["Больницы"].sum() / len(data
 sum_plus = prices["Солнце"]*my_objects_count["Солнце"] + prices["Ветер"]*my_objects_count["Ветер"]
 sum_min = prices["Дома"]*my_objects_count["Дома"] + prices["Заводы"]*my_objects_count["Заводы"] + prices["Больницы"]*my_objects_count["Больницы"]
 #Выясняю кто в приоритете и на сколько, присваиваю проигрывающей стороне надбавку в проценте отстования, а выигрывающей стороне ничего не даю
-if sum_plus == 0:
+if (sum_plus == 0) and (sum_min != 0):
     sum_plus = 1
     sum_min = 0
-elif sum_min == 0:
+elif (sum_plus != 0) and (sum_min == 0):
     sum_plus = 0
     sum_min = 1
+elif (sum_plus == sum_min):
+    sum_plus = 0.5
+    sum_min = 0.5
 elif sum_plus > sum_min:
-    sum_plus = 0
-    sum_min /= sum_plus
+    sum_min = 0.5 + (sum_min / sum_plus)/2
+    sum_plus = 1 - sum_min
 elif sum_plus < sum_min:
-    sum_plus /= sum_min
-    sum_min = 0
-else:
-    sum_plus = 0
-    sum_min = 0
+    sum_plus = 0.5 + (sum_plus / sum_min)/2
+    sum_min = 1 - sum_plus
 #Создаю третий модификатор: отношение накопления энергии к тратам энергии = 0-1
 mods[0].append(sum_plus)
 mods[1].append(sum_plus)
@@ -92,9 +92,8 @@ prices["Больницы"] =    10*(1-prices["Больницы"])
 print(prices)
 
 #Корректировка цены по сделкам противников
-for building in last_prices.keys():
-    if last_prices[building]:
-        prices[building] = (prices[building] + last_prices[building]) / 2
-        last_prices[building] = None
-
-print(prices)
+#Закоммитил, ибо сомневаюсь в целесообразности данной корректировки
+# for building in last_prices.keys():
+#     if last_prices[building]:
+#         prices[building] = (prices[building] + last_prices[building]) / 2
+#         last_prices[building] = None
