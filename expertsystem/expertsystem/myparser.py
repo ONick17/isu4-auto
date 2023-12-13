@@ -12,7 +12,6 @@ PRODUCER_MAX_VALUE = 20
 MIN_THRESHOLD = 0.17
 MAX_THRESHOLD = 0.25
 
-DISCONT = 0.02
 
 ProducerName: TypeAlias = Literal['Ветер', 'Солнце']
 ConsumerName: TypeAlias = Literal['Больницы', 'Дома', 'Заводы']
@@ -339,13 +338,23 @@ class DataProcessor():
             plt.legend()
             plt.draw()
 
-    def get_values(self):
+    def get_values(self) -> dict:
 
         objects_count = self.ALL_OBJECTS_COUNT
-        enemy_objects_count = {"Солнце": 1, "Ветер": 1,
-                               "Дома": 5, "Заводы": 2, "Больницы": 0}
-        my_objects_count = {"Солнце": 2, "Ветер": 0,
-                            "Дома": 2, "Заводы": 2, "Больницы": 2}
+        enemy_objects_count: dict[ProducerName | ConsumerName, int] = {
+            'Солнце': len(self.producer_enemy_objects["Солнце"]),
+            'Ветер': len(self.producer_enemy_objects['Ветер']),
+            'Больницы': len(self.consumer_enemy_objects["Больницы"]),
+            'Заводы': len(self.consumer_enemy_objects["Заводы"]),
+            'Дома': len(self.consumer_enemy_objects["Дома"])
+        }
+        my_objects_count = {
+            'Солнце': len(self.producer_objects["Солнце"]),
+            'Ветер': len(self.producer_objects['Ветер']),
+            'Больницы': len(self.consumer_objects["Больницы"]),
+            'Заводы': len(self.consumer_objects["Заводы"]),
+            'Дома': len(self.consumer_objects["Дома"])
+        }
         # last_prices = {"Солнце": None, "Ветер": 15.5,
         #                "Дома": None, "Заводы": 4, "Больницы": None}
 
