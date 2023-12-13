@@ -714,14 +714,43 @@ class MyMainWindow(object):
     # Подсчёт средних счётчиков и вывод информации в лейблах
     def update_mean_labels(self):
         try:
+            # Вывод среднего накопления энергии
             #"0МВт"
             self.lbl_mean_energy2.setText(str(int(self.data_processor.get_mean_energy_store())) + "МВт")
             
-            #self.lbl_mean_lost2.setText(str() + "МВт")
+            # Вывод средней потери энергии за ход из-за КПД проводов
+            """
             # Максимальный уровень потерь в 20% достигается при суммарной мощности на ветке в 18 МВт независимо от того, генератор или потребитель находятся на этой ветке.
             # Ожидаемые потери: 20%, если больше или равно 18МВт. ?%, если меньше 18МВт
             # Предположение: (x/4)^2=процент потери, где x - текущая энергия
             # Максимальное число веток: 5, если одна миниподстанция
+            # Рассчёт среднего числа производимой энергии за ход
+            mean_lost_plus = mean_sun_energy*self.my_objects_count["СЭС"]+mean_wind_energy*self.my_objects_count["ВЭС"]
+            # Рассчёт примерной потери энергии при передаче от производителей до главной станции
+            if mean_lost_plus > 36:
+                mean_lost_plus *= 0.2
+            elif mean_lost_plus > 18:
+                mean_lost_plus = 18*0.2 + (mean_lost_plus-18)*(((mean_lost_plus-18)/4)**2)/100
+            else:
+                mean_lost_plus = mean_lost_plus * ((mean_lost_plus/4)**2) / 100
+
+            # Рассчёт среднего числа поглощаемой энергии за ход
+            mean_lost_min = mean_house_energy*self.my_objects_count["Микрорайон"]+mean_factory_energy*self.my_objects_count["Завод"]+mean_hospital_energy*self.my_objects_count["Больница"]
+            # Рассчёт потери энергии при передаче от главной станции до миниподстанции
+            if mean_lost_min > 18:
+                mean_lost_min2 = mean_lost_min*0.2
+                mean_lost_min = mean_lost_min*0.8
+            # Рассчёт потери энергии при передаче от миниподстанции до потребителей
+            if mean_lost_min > 36:
+                mean_lost_min *= 0.2
+            elif mean_lost_min > 18:
+                mean_lost_min = 18*0.2 + (mean_lost_min-18)*(((mean_lost_min-18)/4)**2)/100
+            else:
+                mean_lost_min = mean_lost_min * ((mean_lost_min/4)**2) / 100
+            mean_lost_min += mean_lost_min2
+
+            self.lbl_mean_lost2.setText(str(mean_lost_min+mean_lost_plus) + "МВт")
+            """
         except Exception as error:
             print("функция update_mean_labels")
             print(error)
@@ -731,10 +760,6 @@ class MyMainWindow(object):
 
     # TODO
     # Подсчёт рекомендуемых ценников
-    """
-    получить по каждому из модификаторов значение от 0 до 20, затем просуммировать их и поделить на 100.
-    Если модификаторов 5, то в конце получится число от 0 до 1: ни больше, ни меньше 100%. И это и была бы ценность объекта.
-    """
     def update_price_labels(self):
         try:
             data = self.data_processor.get_base_values()
