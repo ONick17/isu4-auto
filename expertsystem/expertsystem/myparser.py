@@ -265,7 +265,8 @@ class DataProcessor():
             ConsumerName, list[Tariff]] = defaultdict(lambda: [])
         self.producer_enemy_objects: DefaultDict[ProducerName, list[Tariff]] = defaultdict(
             lambda: [])
-        self.objects_count = 0
+        self.objects_count = len(self.producer_objects["Солнце"]) + len(self.producer_objects['Ветер']) + len(
+            self.consumer_objects["Больницы"]) + len(self.consumer_objects["Заводы"]) + len(self.consumer_objects["Дома"])
         self.enemy_objects_count = 0
         self.bought_objects_count = self.objects_count
 
