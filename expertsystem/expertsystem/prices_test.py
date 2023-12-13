@@ -1,7 +1,7 @@
 from myparser import DataProcessor
 
 data_processor = DataProcessor()
-data_processor = data_processor.parse('./expertsystem/forecast.csv')
+data_processor = data_processor.parse('./forecast.csv')
 
 objects_count = {"Солнце": 4, "Ветер": 2, "Дома": 8, "Заводы": 4, "Больницы": 3}
 enemy_objects_count = {"Солнце": 1, "Ветер": 1, "Дома": 5, "Заводы": 2, "Больницы": 0}
