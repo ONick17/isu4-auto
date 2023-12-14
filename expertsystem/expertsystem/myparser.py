@@ -94,6 +94,11 @@ class DataProcessor():
                            dtype=float,
                            usecols=(1, 2, 3, 4, 5))
 
+        data["Солнце"] = data["Солнце"]/1.07
+        data.loc[data["Солнце"] > 15, "Солнце"] = 15.
+        data["Ветер"] = (data["Ветер"]/4.6)**3
+        data.loc[data["Ветер"] > 15, "Ветер"] = 15.
+
         for building in list(data.keys()):
             data[f'{building}17'] = np.array(
                 data[building]) * (1 - MIN_THRESHOLD)
@@ -396,18 +401,14 @@ class DataProcessor():
         mods[1].append(enemy_objects_count["Ветер"] / objects_count["Ветер"])
         mods[2].append(enemy_objects_count["Дома"] / objects_count["Дома"])
         mods[3].append(enemy_objects_count["Заводы"] / objects_count["Заводы"])
-        mods[4].append(enemy_objects_count["Больницы"] /
-                       objects_count["Больницы"])
+        mods[4].append(enemy_objects_count["Больницы"] / objects_count["Больницы"])
 
         # Нахожу средний показатель энергии за ход для каждого объекта
-        prices["Солнце"] = self.data["Солнце"].sum() / \
-            len(self.data["Солнце"])
+        prices["Солнце"] = self.data["Солнце"].sum() / len(self.data["Солнце"])
         prices["Ветер"] = self.data["Ветер"].sum() / len(self.data["Ветер"])
         prices["Дома"] = self.data["Дома"].sum() / len(self.data["Дома"])
-        prices["Заводы"] = self.data["Заводы"].sum() / \
-            len(self.data["Заводы"])
-        prices["Больницы"] = self.data["Больницы"].sum() / \
-            len(self.data["Больницы"])
+        prices["Заводы"] = self.data["Заводы"].sum() / len(self.data["Заводы"])
+        prices["Больницы"] = self.data["Больницы"].sum() / len(self.data["Больницы"])
         # Нахожу сколько энергии в данный момент добывается моими объектами
         sum_plus = prices["Солнце"]*my_objects_count["Солнце"] + \
             prices["Ветер"]*my_objects_count["Ветер"]

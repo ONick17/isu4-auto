@@ -111,6 +111,19 @@ class MyMainWindow(object):
         self.lstbox_plot_show.addItem("Потребители")
         self.lstbox_plot_show.setCurrentIndex(0)
 
+        # Подпись "Суммировать категории"
+        self.lbl_plot_sum = QtWidgets.QLabel(parent=self.centralwidget)
+        self.lbl_plot_sum.setGeometry(QtCore.QRect(320, 85, 150, 20))
+        self.lbl_plot_sum.setFont(font)
+        self.lbl_plot_sum.setObjectName("lbl_plot_sum")
+        # Выпадающий список для включения суммирования категорий
+        self.lstbox_plot_sum = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.lstbox_plot_sum.setGeometry(QtCore.QRect(470, 85, 115, 20))
+        self.lstbox_plot_sum.setObjectName("lstbox_plot_sum")
+        self.lstbox_plot_sum.addItem("Нет")
+        self.lstbox_plot_sum.addItem("Да")
+        self.lstbox_plot_sum.setCurrentIndex(0)
+
         # Подпись "Отклонение данных"
         self.lbl_deviations = QtWidgets.QLabel(parent=self.centralwidget)
         self.lbl_deviations.setGeometry(QtCore.QRect(20, 110, 160, 20))
@@ -421,6 +434,7 @@ class MyMainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Экспертная система принятия решений для ИЭС"))
         self.lbl_plot_mode.setText(_translate("MainWindow", "График"))
         self.lbl_plot_show.setText(_translate("MainWindow", "Показывать"))
+        self.lbl_plot_sum.setText(_translate("MainWindow", "Суммировать категории"))
         self.lbl_deviation_sun.setText(_translate("MainWindow", "Солнце"))
         self.btn_select_file.setText(_translate("MainWindow", "Выбрать файл"))
         self.lbl_deviations.setText(_translate("MainWindow", "Отклонение данных"))
@@ -470,6 +484,8 @@ class MyMainWindow(object):
         self.lstbox_plot_mode.currentIndexChanged.connect(self.change_pyplot_data)
         # Изменение выбора отображения
         self.lstbox_plot_show.currentIndexChanged.connect(self.change_pyplot_data)
+        # Изменение выбора суммирования
+        self.lstbox_plot_sum.currentIndexChanged.connect(self.change_pyplot_data)
         # Изменение отклонений данных
         self.lstbox_deviation_sun.currentIndexChanged.connect(self.change_pyplot_data)
         self.lstbox_deviation_wind.currentIndexChanged.connect(self.change_pyplot_data)
@@ -490,7 +506,6 @@ class MyMainWindow(object):
         if fl:
             self.lbl_select_file.setText(fl[0])
             self.check_file()
-
 
     # Проверка выбранного файла на соответствие
     def check_file(self):
@@ -525,6 +540,9 @@ class MyMainWindow(object):
                     to_show = {"Солнце": [], "Ветер": []}
                 else:
                     to_show = {"Дома": [], "Заводы": [], "Больницы": []}
+                # 0 - не суммировать
+                # 1 - суммировать
+                sum_mode = bool(self.lstbox_plot_sum.currentIndex())
                 # 0 - +25
                 # 1 - 0
                 # 2 - -17
@@ -582,17 +600,33 @@ class MyMainWindow(object):
                     factory_count = self.my_objects_count["Завод"]
                     hospital_count = self.my_objects_count["Больница"]
                 # Сбор графика
-                for building in list(to_show.keys()):
-                    if building == "Солнце":
-                        self.pyplot.axes.plot(self.data_processor.data.loc[:, sun]*sun_count, label="Солнце")
-                    elif building == "Ветер":
-                        self.pyplot.axes.plot(self.data_processor.data.loc[:, wind]*wind_count, label="Ветер")
-                    elif building == "Дома":
-                        self.pyplot.axes.plot(self.data_processor.data.loc[:, house]*house_count, label="Дома")
-                    elif building == "Заводы":
-                        self.pyplot.axes.plot(self.data_processor.data.loc[:, factory]*factory_count, label="Заводы")
-                    elif building == "Больницы":
-                        self.pyplot.axes.plot(self.data_processor.data.loc[:, hospital]*hospital_count, label="Больницы")
+                sun_plot = self.data_processor.data.loc[:, sun]*sun_count
+                wind_plot = self.data_processor.data.loc[:, wind]*wind_count
+                house_plot = self.data_processor.data.loc[:, house]*house_count
+                factory_plot = self.data_processor.data.loc[:, factory]*factory_count
+                hospital_plot = self.data_processor.data.loc[:, hospital]*hospital_count
+                if sum_mode:
+                    pluss = sun_plot + wind_plot
+                    mins = house_plot + factory_plot + hospital_plot
+                    if show == 0:
+                        self.pyplot.axes.plot(pluss, label="Производители")
+                        self.pyplot.axes.plot(mins, label="Потребители")
+                    elif show == 1:
+                        self.pyplot.axes.plot(pluss, label="Производители")
+                    else:
+                        self.pyplot.axes.plot(mins, label="Потребители")
+                else:
+                    for building in list(to_show.keys()):
+                        if building == "Солнце":
+                            self.pyplot.axes.plot(sun_plot, label="Солнце")
+                        elif building == "Ветер":
+                            self.pyplot.axes.plot(wind_plot, label="Ветер")
+                        elif building == "Дома":
+                            self.pyplot.axes.plot(house_plot, label="Дома")
+                        elif building == "Заводы":
+                            self.pyplot.axes.plot(factory_plot, label="Заводы")
+                        elif building == "Больницы":
+                            self.pyplot.axes.plot(hospital_plot, label="Больницы")
                 # plt.legend(list(data.keys()))
                 self.pyplot.axes.legend()
                 self.pyplot.draw()
